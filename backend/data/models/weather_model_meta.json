@@ -1,0 +1,24 @@
+{
+  "lap_features": [
+    "track_temp",
+    "air_temp",
+    "temp_delta",
+    "rainfall_binary",
+    "wind_speed",
+    "track_temp_delta",
+    "is_cool_track",
+    "is_hot_track",
+    "circuit_encoded",
+    "lap_fraction"
+  ],
+  "sc_features": [
+    "track_temp",
+    "air_temp",
+    "rainfall_binary",
+    "wind_speed",
+    "track_temp_delta",
+    "is_cool_track",
+    "circuit_encoded",
+    "lap_fraction"
+  ]
+}

@@ -1,0 +1,17 @@
+[
+  "lap_number",
+  "laps_remaining",
+  "circuit_encoded",
+  "track_temp",
+  "air_temp",
+  "rainfall",
+  "incidents_so_far",
+  "cars_within_2s",
+  "mean_tyre_age_field",
+  "year",
+  "lap_fraction",
+  "field_tyre_stress_index",
+  "wind_speed",
+  "track_temp_delta",
+  "historical_sc_rate"
+]

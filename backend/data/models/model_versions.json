@@ -1,0 +1,116 @@
+{
+  "active": {
+    "weather": {
+      "file": "weather_lap_model.pkl",
+      "ts": "20260318_051726",
+      "metrics": {
+        "trained": "2026-03-18T05:17:26.019868"
+      }
+    },
+    "xgb": {
+      "file": "xgb_sc_model_20260318_051922.pkl",
+      "ts": "20260318_051922",
+      "metrics": {
+        "auc": 0.7421628548895899,
+        "brier": 0.040398092966179876
+      }
+    },
+    "lstm": {
+      "file": "lstm_weights_20260318_051909.pt",
+      "ts": "20260318_051909",
+      "metrics": {
+        "rmse": 4.1694161893222095,
+        "cliff_auc": 0.5313456322158854
+      }
+    },
+    "ppo": {
+      "file": "ppo_strategy_policy_20260318_061044.zip",
+      "ts": "20260318_061044",
+      "metrics": {}
+    }
+  },
+  "history": [
+    {
+      "component": "weather",
+      "ts": "20260318_050533",
+      "file": "weather_lap_model.pkl",
+      "metrics": {
+        "trained": "2026-03-18T05:05:33.457813"
+      }
+    },
+    {
+      "component": "xgb",
+      "ts": "20260318_050534",
+      "file": "xgb_sc_model_20260318_050534.pkl",
+      "metrics": {
+        "auc": 0.7421628548895899,
+        "brier": 0.040398092966179876
+      }
+    },
+    {
+      "component": "lstm",
+      "ts": "20260318_050628",
+      "file": "lstm_weights_20260318_050628.pt",
+      "metrics": {
+        "rmse": 1.8660536197827986,
+        "cliff_auc": 0.5539191820837391
+      }
+    },
+    {
+      "component": "lstm",
+      "ts": "20260318_050943",
+      "file": "lstm_weights_20260318_050943.pt",
+      "metrics": {
+        "rmse": 1.7864863256795231,
+        "cliff_auc": 0.5850083460842954
+      }
+    },
+    {
+      "component": "lstm",
+      "ts": "20260318_051219",
+      "file": "lstm_weights_20260318_051219.pt",
+      "metrics": {
+        "rmse": 4.187471484421019,
+        "cliff_auc": 0.5131842050354709
+      }
+    },
+    {
+      "component": "weather",
+      "ts": "20260318_051726",
+      "file": "weather_lap_model.pkl",
+      "metrics": {
+        "trained": "2026-03-18T05:17:26.019868"
+      }
+    },
+    {
+      "component": "lstm",
+      "ts": "20260318_051909",
+      "file": "lstm_weights_20260318_051909.pt",
+      "metrics": {
+        "rmse": 4.1694161893222095,
+        "cliff_auc": 0.5313456322158854
+      }
+    },
+    {
+      "component": "xgb",
+      "ts": "20260318_051922",
+      "file": "xgb_sc_model_20260318_051922.pkl",
+      "metrics": {
+        "auc": 0.7421628548895899,
+        "brier": 0.040398092966179876
+      }
+    },
+    {
+      "component": "ppo",
+      "ts": "20260318_054205",
+      "file": "ppo_strategy_policy_20260318_054205.zip",
+      "metrics": {}
+    },
+    {
+      "component": "ppo",
+      "ts": "20260318_061044",
+      "file": "ppo_strategy_policy_20260318_061044.zip",
+      "metrics": {}
+    }
+  ]
+}

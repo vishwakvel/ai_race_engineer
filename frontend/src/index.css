@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* === HOMEPAGE COLORS === */
+  --ferrari-red: #e4032e;
+  --ferrari-red-dark: #b5021f;
+  --ferrari-red-glow: rgba(228, 3, 46, 0.15);
+  --sky-blue: #95c4eb;
+  --sky-blue-dim: rgba(149, 196, 235, 0.2);
+
+  /* Homepage backgrounds */
+  --home-bg: #050508;
+  --home-surface: #0c0c12;
+  --home-card: #111118;
+
+  /* Homepage text */
+  --home-text-primary: #f0f0f5;
+  --home-text-secondary: #8888a0;
+  --home-text-muted: #404055;
+
+  /* Homepage borders */
+  --home-border: rgba(255, 255, 255, 0.06);
+  --home-border-accent: rgba(228, 3, 46, 0.3);
+
+  /* === DASHBOARD COLORS === */
+  --dash-bg: #06060f;
+  --dash-surface: #0c0c1c;
+  --dash-elevated: #121228;
+  --dash-border: #1a1a35;
+  --dash-border-bright: #252545;
+
+  --dash-text-primary: #e8e8f2;
+  --dash-text-secondary: #5a5a80;
+  --dash-text-muted: #2e2e50;
+
+  /* Tyre compounds — FIA standard colors */
+  --tyre-soft: #e8334a;
+  --tyre-medium: #f5c518;
+  --tyre-hard: #d8d8d8;
+  --tyre-inter: #39c473;
+  --tyre-wet: #4a9fe0;
+
+  /* Status */
+  --status-gain: #22c55e;
+  --status-loss: #ef4444;
+  --status-warn: #f59e0b;
+  --status-urgent: #ff5722;
+  --status-sc: #ff9800;
+
+  /* === TYPOGRAPHY === */
+  --font-display: "Barlow Condensed", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --font-body: "Inter", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--home-bg);
+  color: var(--home-text-primary);
+  font-family: var(--font-display);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+#dashboard {
+  position: relative;
+  min-height: 100vh;
+  background: var(--dash-bg);
+}
+
+/* Remove default focus outlines; use custom where needed */
+button:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 1px solid var(--ferrari-red);
+  outline-offset: 2px;
+}
+
+button,
+select {
+  font-family: inherit;
+}
+
+input {
+  font-family: inherit;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.engineer-feed::-webkit-scrollbar {
+  width: 2px;
+}
+.engineer-feed::-webkit-scrollbar-track {
+  background: transparent;
+}
+.engineer-feed::-webkit-scrollbar-thumb {
+  background: var(--dash-border-bright);
+  border-radius: 1px;
+}

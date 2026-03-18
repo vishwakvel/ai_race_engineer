@@ -1,0 +1,172 @@
+[
+  {
+    "circuit_id": "melbourne",
+    "circuit_lt_mean": 86.44098536585365,
+    "circuit_lt_std": 5.044765777495013
+  },
+  {
+    "circuit_id": "sakhir",
+    "circuit_lt_mean": 97.01483850931676,
+    "circuit_lt_std": 2.060883151284327
+  },
+  {
+    "circuit_id": "shanghai",
+    "circuit_lt_mean": 100.22884722222221,
+    "circuit_lt_std": 3.5098759313426995
+  },
+  {
+    "circuit_id": "baku",
+    "circuit_lt_mean": 107.8037347826087,
+    "circuit_lt_std": 3.1762889051263237
+  },
+  {
+    "circuit_id": "barcelona",
+    "circuit_lt_mean": 82.87336676217765,
+    "circuit_lt_std": 4.566596356028442
+  },
+  {
+    "circuit_id": "monte_carlo",
+    "circuit_lt_mean": 79.55818666666666,
+    "circuit_lt_std": 2.809733365696167
+  },
+  {
+    "circuit_id": "montr\u00e9al",
+    "circuit_lt_mean": 78.97401060070672,
+    "circuit_lt_std": 5.627869915933342
+  },
+  {
+    "circuit_id": "le_castellet",
+    "circuit_lt_mean": 98.18628301886793,
+    "circuit_lt_std": 3.453315851288503
+  },
+  {
+    "circuit_id": "spielberg",
+    "circuit_lt_mean": 70.168512,
+    "circuit_lt_std": 3.033366468153206
+  },
+  {
+    "circuit_id": "silverstone",
+    "circuit_lt_mean": 92.7892208588957,
+    "circuit_lt_std": 4.29002497611455
+  },
+  {
+    "circuit_id": "hockenheim",
+    "circuit_lt_mean": 83.84309589041096,
+    "circuit_lt_std": 6.162375182789083
+  },
+  {
+    "circuit_id": "monza",
+    "circuit_lt_mean": 85.92971192052981,
+    "circuit_lt_std": 4.1574490205647745
+  },
+  {
+    "circuit_id": "singapore",
+    "circuit_lt_mean": 107.81246078431371,
+    "circuit_lt_std": 1.9712753959215659
+  },
+  {
+    "circuit_id": "sochi",
+    "circuit_lt_mean": 100.66581382978723,
+    "circuit_lt_std": 4.209199205206679
+  },
+  {
+    "circuit_id": "suzuka",
+    "circuit_lt_mean": 98.21342631578948,
+    "circuit_lt_std": 4.308987984691286
+  },
+  {
+    "circuit_id": "austin",
+    "circuit_lt_mean": 101.39378057553958,
+    "circuit_lt_std": 2.7673926863021996
+  },
+  {
+    "circuit_id": "mexico_city",
+    "circuit_lt_mean": 82.83105154639175,
+    "circuit_lt_std": 3.226825718807631
+  },
+  {
+    "circuit_id": "s\u00e3o_paulo",
+    "circuit_lt_mean": 76.92052525252525,
+    "circuit_lt_std": 5.679034361335727
+  },
+  {
+    "circuit_id": "yas_marina",
+    "circuit_lt_mean": 105.44969387755101,
+    "circuit_lt_std": 1.5837897351511243
+  },
+  {
+    "circuit_id": "budapest",
+    "circuit_lt_mean": 83.36890092879257,
+    "circuit_lt_std": 2.0644444283166927
+  },
+  {
+    "circuit_id": "spa-francorchamps",
+    "circuit_lt_mean": 110.71963829787235,
+    "circuit_lt_std": 2.5728077791533233
+  },
+  {
+    "circuit_id": "yas_island",
+    "circuit_lt_mean": 94.30343506493506,
+    "circuit_lt_std": 7.403068354027375
+  },
+  {
+    "circuit_id": "mugello",
+    "circuit_lt_mean": 84.32688372093024,
+    "circuit_lt_std": 3.987559327573591
+  },
+  {
+    "circuit_id": "n\u00fcrburgring",
+    "circuit_lt_mean": 93.50926,
+    "circuit_lt_std": 4.0466496790429
+  },
+  {
+    "circuit_id": "portim\u00e3o",
+    "circuit_lt_mean": 82.50212396694215,
+    "circuit_lt_std": 1.2620459287089387
+  },
+  {
+    "circuit_id": "imola",
+    "circuit_lt_mean": 82.2325909090909,
+    "circuit_lt_std": 4.6614028642599346
+  },
+  {
+    "circuit_id": "istanbul",
+    "circuit_lt_mean": 99.33114018691589,
+    "circuit_lt_std": 6.874423002131742
+  },
+  {
+    "circuit_id": "zandvoort",
+    "circuit_lt_mean": 76.64303070175438,
+    "circuit_lt_std": 3.0916442503721813
+  },
+  {
+    "circuit_id": "lusail",
+    "circuit_lt_mean": 87.61103424657534,
+    "circuit_lt_std": 2.7710675981112285
+  },
+  {
+    "circuit_id": "jeddah",
+    "circuit_lt_mean": 94.7350350877193,
+    "circuit_lt_std": 5.36678626465843
+  },
+  {
+    "circuit_id": "miami",
+    "circuit_lt_mean": 93.00134868421053,
+    "circuit_lt_std": 2.3612143111775175
+  },
+  {
+    "circuit_id": "monaco",
+    "circuit_lt_mean": 82.4184630541872,
+    "circuit_lt_std": 9.37936257425689
+  },
+  {
+    "circuit_id": "marina_bay",
+    "circuit_lt_mean": 104.30352469135802,
+    "circuit_lt_std": 9.120285597577185
+  },
+  {
+    "circuit_id": "las_vegas",
+    "circuit_lt_mean": 98.29253488372092,
+    "circuit_lt_std": 4.226105632425191
+  }
+]
