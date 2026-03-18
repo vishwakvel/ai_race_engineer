@@ -1,41 +1,17 @@
-<div align="center">
-
-<img src="https://img.shields.io/badge/Ferrari-E10600?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyeiIvPjwvc3ZnPg==&logoColor=white" />
-<img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white" />
-<img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
-<img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
-<img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" />
-<img src="https://img.shields.io/badge/Claude-API-black?style=for-the-badge" />
-
-<br /><br />
-
 ```
-██╗     ███████╗ ██████╗██╗     ███████╗██████╗  ██████╗ █████╗ ██╗
-██║     ██╔════╝██╔════╝██║     ██╔════╝██╔══██╗██╔════╝██╔══██╗██║
-██║     █████╗  ██║     ██║     █████╗  ██████╔╝██║     ███████║██║
-██║     ██╔══╝  ██║     ██║     ██╔══╝  ██╔══██╗██║     ██╔══██║██║
-███████╗███████╗╚██████╗███████╗███████╗██║  ██║╚██████╗██║  ██║██║
-╚══════╝╚══════╝ ╚═════╝╚══════╝╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝
+        ██╗     ███████╗ ██████╗██╗     ███████╗██████╗  ██████╗    █████╗ ██╗
+        ██║     ██╔════╝██╔════╝██║     ██╔════╝██╔══██╗██╔════╝   ██╔══██╗██║
+        ██║     █████╗  ██║     ██║     █████╗  ██████╔╝██║        ███████║██║
+        ██║     ██╔══╝  ██║     ██║     ██╔══╝  ██╔══██╗██║        ██╔══██║██║
+        ███████╗███████╗╚██████╗███████╗███████╗██║  ██║╚██████╗   ██║  ██║██║
+        ╚══════╝╚══════╝ ╚═════╝╚══════╝╚══════╝╚═╝  ╚═╝ ╚═════╝   ╚═╝  ╚═╝╚═╝
 ```
 
 ### *The AI race engineer Charles deserves*
 
 **7,775 real laps · 4 ML models · Monte Carlo simulation · Claude-powered team radio**
 
-[**Live Demo**](#setup--run) · [**Architecture**](#architecture) · [**ML Stack**](#machine-learning-stack) · [**Setup**](#setup--run)
-
-<br />
-
-```
-╔══════════════════════════════════════════════════════════════╗
-║  "We are checking."  — Ferrari, probably                     ║
-║                                                              ║
-║  LeclercAI: "Box this lap, box this lap. Mediums going on.   ║
-║  Gap behind is 3.2 — you exit in clean air. Let's go."       ║
-╚══════════════════════════════════════════════════════════════╝
-```
-
-</div>
+[**Architecture**](#architecture) · [**ML Stack**](#machine-learning-stack) · [**Setup**](#setup--run)
 
 ---
 
@@ -742,13 +718,3 @@ The engineer generates different messages based on race situation. Priority orde
 | `CLOSE_AHEAD` | ⚪ ROUTINE | `gap_ahead` ≤ 1.2s |
 | `PRESSURE_BEHIND` | ⚪ ROUTINE | `gap_behind` ≤ 0.8s |
 | `ROUTINE_PACE_NOTE` | ⚪ ROUTINE | Default (every 2–3 laps) |
-
----
-
-<div align="center">
-
-**Built with** PyTorch · XGBoost · Stable-Baselines3 · FastAPI · React · Anthropic Claude · FastF1
-
-<img src="https://img.shields.io/badge/Made%20for-Charles%20Leclerc-E10600?style=flat-square" />
-
-</div>
