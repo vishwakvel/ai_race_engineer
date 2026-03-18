@@ -1,349 +1,713 @@
 <div align="center">
 
-# LeclercAI
+<img src="https://img.shields.io/badge/Ferrari-E10600?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyeiIvPjwvc3ZnPg==&logoColor=white" />
+<img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+<img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
+<img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
+<img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" />
+<img src="https://img.shields.io/badge/Claude-API-black?style=for-the-badge" />
 
-**The AI race engineer Charles deserves**
+<br /><br />
+
+```
+██╗     ███████╗ ██████╗██╗     ███████╗██████╗  ██████╗ █████╗ ██╗
+██║     ██╔════╝██╔════╝██║     ██╔════╝██╔══██╗██╔════╝██╔══██╗██║
+██║     █████╗  ██║     ██║     █████╗  ██████╔╝██║     ███████║██║
+██║     ██╔══╝  ██║     ██║     ██╔══╝  ██╔══██╗██║     ██╔══██║██║
+███████╗███████╗╚██████╗███████╗███████╗██║  ██║╚██████╗██║  ██║██║
+╚══════╝╚══════╝ ╚═════╝╚══════╝╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝
+```
+
+### *The AI race engineer Charles deserves*
+
+**7,775 real laps · 4 ML models · Monte Carlo simulation · Claude-powered team radio**
+
+[**Live Demo**](#setup--run) · [**Architecture**](#architecture) · [**ML Stack**](#machine-learning-stack) · [**Setup**](#setup--run)
+
+<br />
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║  "We are checking."  — Ferrari, probably                     ║
+║                                                              ║
+║  LeclercAI: "Box this lap, box this lap. Mediums going on.   ║
+║  Gap behind is 3.2 — you exit in clean air. Let's go."       ║
+╚══════════════════════════════════════════════════════════════╝
+```
 
 </div>
 
 ---
 
-Are you a fellow **Charles Leclerc** fan who’s watched yet another race where the radio sounds like a group project gone wrong—vague deltas, strategy that arrives three laps late, and that special feeling when *“we are checking”* is the whole briefing? Do you quietly wish someone would just **tell him the gaps, the deg, and when to box** like they mean it?
+## What is this?
 
-**Feel sad no more.** Here is **LeclercAI** (*ai_race_engineer*): a full-stack playground that ingests **real Charles Leclerc race laps** (FastF1, 2018–2024), trains **LSTM + XGBoost + PPO + weather models**, runs **Monte Carlo race simulation**, and pipes the numbers into an **LLM “race engineer”** that speaks in warm, stacked team-radio style—**without inventing strategy** (the models decide; Claude just narrates).
+LeclercAI is a full-stack AI race engineering system built around **Charles Leclerc's actual race history** (2018–2024, sourced via FastF1). It trains a suite of ML models on real telemetry, runs live race simulation, and feeds everything into a **Claude-powered engineer** that speaks in authentic team radio style — grounded in model outputs, never hallucinating strategy.
 
-It’s part data science project, part coping mechanism, part “what if Xavier had unlimited bandwidth and zero politics.” **Forza.**
+This is not a chatbot. The AI doesn't decide strategy. **The models decide. Claude narrates.**
 
-<p align="center">
-  <svg width="100%" height="4" viewBox="0 0 800 4" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><defs><linearGradient id="leclercGrad1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#E10600"/><stop offset="50%" style="stop-color:#DC0000"/><stop offset="100%" style="stop-color:#15151E"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#leclercGrad1)"/></svg>
-</p>
+```
+Real lap data  →  LSTM + XGBoost + PPO + Weather models
+                                    ↓
+              Monte Carlo simulation (50 race futures)
+                                    ↓
+              Claude generates the radio call
+              based only on what the models say
+```
 
-## Table of contents
+---
 
-1. [What this project does](#what-this-project-does)
-2. [High-level architecture](#high-level-architecture)
-3. [Machine learning stack](#machine-learning-stack)
-4. [Data pipeline](#data-pipeline)
-5. [Backend (FastAPI)](#backend-fastapi)
-6. [Frontend (React + Vite)](#frontend-react--vite)
-7. [Repository file structure](#repository-file-structure)
-8. [Setup & run](#setup--run)
-9. [Training order & artifacts](#training-order--artifacts)
-10. [Environment variables](#environment-variables)
+## Table of Contents
+
+1. [Architecture](#architecture)
+2. [Machine Learning Stack](#machine-learning-stack)
+3. [How It All Connects](#how-it-all-connects)
+4. [Data Pipeline](#data-pipeline)
+5. [Backend API](#backend-api)
+6. [Frontend Dashboard](#frontend-dashboard)
+7. [File Structure](#file-structure)
+8. [Setup & Run](#setup--run)
+9. [Training Pipeline](#training-pipeline)
+10. [Environment Variables](#environment-variables)
 11. [Docker](#docker)
-12. [Disclaimer](#disclaimer)
 
-<p align="center">
-  <svg width="100%" height="3" viewBox="0 0 800 3" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><rect width="100%" height="100%" fill="#E10600" opacity="0.85"/></svg>
-</p>
+---
 
-## What this project does
-
-| Area | What you get |
-|------|----------------|
-| **Telemetry & history** | Browse **every race** in the dataset by year/round/circuit; replay **lap times**, **tyre stints**, **gaps**, **SC flags**, weather fields, fuel/stint metadata where available. |
-| **Next-lap prediction** | **LSTM** on stint sequence → predicted lap time, degradation signal, tyre “cliff” risk; **weather model** nudges lap delta and advisories. |
-| **Safety car intelligence** | **XGBoost** estimates SC probability with **SHAP**-style factor highlights; weather can **scale** SC risk; circuit **VSC ratio** from historical JSON. |
-| **Strategy** | **PPO** policy recommends **STAY_OUT** vs **PIT_SOFT / PIT_MEDIUM / PIT_HARD**; optional **Monte Carlo** finishing distribution (P10/median/P90). |
-| **Voice of the engineer** | **Anthropic Claude** generates **team radio–style messages** from *your* ML outputs only—typed (pace note, tyre advisory, box call, rain, SC, etc.). |
-| **Track maps** | Per-circuit **2D track outline** for visual context (from processed GeoJSON / track map pipeline). |
-| **Pre-race** | LLM **pre-race brief** with recommended vs alternative strategies (context from Monte Carlo when data is loaded). |
-
-<p align="center">
-  <svg width="100%" height="3" viewBox="0 0 800 3" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><rect width="100%" height="100%" fill="#15151E"/><rect width="35%" height="100%" fill="#E10600"/></svg>
-</p>
-
-## High-level architecture
+## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         FRONTEND (Vite + React + TS)                     │
-│  Landing (Hero, stats, features) → Race dashboard: replay, charts,      │
-│  track map, strategy timeline, SC gauge, engineer panel, pre-race modal │
-└───────────────────────────────────┬─────────────────────────────────────┘
-                                    │ REST (axios)
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                      BACKEND (FastAPI, Python 3.11+)                     │
-│  ModelRegistry: LSTM | XGB | PPO | Weather | FeatureBuilder | RaceSim     │
-│            MonteCarlo | RadioGenerator (Claude)                          │
-└───────────────────────────────────┬─────────────────────────────────────┘
-                                    │
-         ┌──────────────────────────┼──────────────────────────┐
-         ▼                          ▼                          ▼
-   leclerc_career_laps.parquet   data/models/*.pt,*.pkl,*.zip   ANTHROPIC_API_KEY
-   circuit_track_maps.json       circuit_lap_stats.json, etc.
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│                        BROWSER — React + TypeScript                         │
+│                                                                             │
+│   ┌─────────────┐  ┌──────────────────────────────────────────────────┐    │
+│   │  Homepage   │  │               Race Dashboard                      │    │
+│   │             │  │                                                    │    │
+│   │  · Hero     │  │  ┌──────────┐ ┌──────────┐ ┌───────────────────┐ │    │
+│   │  · Stats    │  │  │ Race     │ │ Circuit  │ │  Engineer Panel   │ │    │
+│   │  · Features │  │  │ Selector │ │   Map    │ │                   │ │    │
+│   │             │  │  │          │ │          │ │  ┌─────────────┐  │ │    │
+│   └─────────────┘  │  │ Lap      │ │  Car dot │ │  │ Radio feed  │  │ │    │
+│                    │  │ Controls │ │  animates│ │  │ scrollable  │  │ │    │
+│                    │  └──────────┘ └──────────┘ │  └─────────────┘  │ │    │
+│                    │                             └───────────────────┘ │    │
+│                    │  ┌───────────────────────────────────────────────┐│    │
+│                    │  │  Lap Times · Tyre Deg · Position · SC Gauge   ││    │
+│                    │  │  Strategy Timeline · Pit Window               ││    │
+│                    │  └───────────────────────────────────────────────┘│    │
+│                    └──────────────────────────────────────────────────┘    │
+│                                                                             │
+└──────────────────────────────────┬──────────────────────────────────────────┘
+                                   │  REST / axios
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│                         FASTAPI — Python 3.11                               │
+│                                                                             │
+│   ┌─────────────────────────────────────────────────────────────────────┐  │
+│   │                        ModelRegistry                                 │  │
+│   │                                                                      │  │
+│   │   ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────┐   │  │
+│   │   │   LSTM   │  │ XGBoost  │  │   PPO    │  │  Weather Model   │   │  │
+│   │   │ (PyTorch)│  │(sklearn) │  │  (SB3)   │  │ (GradBoost×2)   │   │  │
+│   │   └────┬─────┘  └────┬─────┘  └────┬─────┘  └────────┬─────────┘   │  │
+│   │        │              │              │                  │             │  │
+│   │        └──────────────┴──────────────┴──────────────────┘             │  │
+│   │                                  │                                    │  │
+│   │                     ┌────────────▼────────────┐                      │  │
+│   │                     │    FeatureBuilder        │                      │  │
+│   │                     │  (normalizes all inputs) │                      │  │
+│   │                     └────────────┬────────────┘                      │  │
+│   │                                  │                                    │  │
+│   │              ┌───────────────────▼──────────────────────┐            │  │
+│   │              │          RadioGenerator (Claude)          │            │  │
+│   │              │   receives structured ML context only     │            │  │
+│   │              │   outputs authentic team radio message    │            │  │
+│   │              └──────────────────────────────────────────┘            │  │
+│   └─────────────────────────────────────────────────────────────────────┘  │
+│                                                                             │
+└──────────────────────────────────┬──────────────────────────────────────────┘
+                                   │
+              ┌────────────────────┼──────────────────────────┐
+              ▼                    ▼                           ▼
+   leclerc_career_laps.parquet   *.pt / *.pkl / *.zip    ANTHROPIC_API_KEY
+   circuit_track_maps.json       circuit_lap_stats.json
 ```
 
-At startup, `ModelRegistry.load_all()` wires **every** inference path: models on disk, **FeatureBuilder** (needs `lstm_norm_stats.json`), **RaceSimulator** + **MonteCarloEngine**, **RadioGenerator**, circuit lap stats, and track maps.
+---
 
-<p align="center">
-  <svg width="100%" height="4" viewBox="0 0 800 4" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><defs><linearGradient id="leclercGrad2" x1="0%" x2="100%"><stop offset="0%" stop-color="#E10600"/><stop offset="100%" stop-color="#15151E"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#leclercGrad2)"/></svg>
-</p>
+## Machine Learning Stack
 
-## Machine learning stack
+### Overview
 
-### 1. LSTM — tyre / next lap (`backend/models/lstm_model.py`, `training/train_lstm.py`)
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                      INFERENCE FLOW (per lap)                        │
+│                                                                      │
+│   Lap data ──┬──► LSTM ────────────────► predicted_lap_time         │
+│              │    (tyre + pace)          deg_rate_tenths/lap         │
+│              │                           cliff_probability           │
+│              │                                    │                  │
+│              ├──► XGBoost ─────────────► sc_probability             │
+│              │    (SC risk)              vsc_ratio                   │
+│              │                           top_shap_factors            │
+│              │                                    │                  │
+│              ├──► Weather Model ────────► weather_lap_delta         │
+│              │    (conditions)           sc_multiplier               │
+│              │                           weather_advisory            │
+│              │                                    │                  │
+│              └──► PPO Policy ──────────► STAY_OUT / PIT_x           │
+│                   (strategy)             pit_window_laps             │
+│                                          action_confidence           │
+│                                                    │                 │
+│                              Monte Carlo ──────────┘                 │
+│                              (50 simulated futures)                  │
+│                                    │                                 │
+│                                    ▼                                 │
+│                         finishing_distribution                       │
+│                         median_finish / P10 / P90                   │
+│                                    │                                 │
+│                                    ▼                                 │
+│                        ┌─────────────────────┐                      │
+│                        │   RadioGenerator     │                      │
+│                        │   Claude API         │                      │
+│                        │   ≤ 3 sentences      │                      │
+│                        │   real numbers only  │                      │
+│                        └─────────────────────┘                      │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
-- Consumes **recent stint laps** + **current state** (circuit-normalized lap time stats, lap number, compound, tyre age, gaps, etc.).
-- Outputs **predicted next lap time**, **deg rate**, **cliff probability**.
-- Weights: `lstm_weights*.pt`; config: `lstm_config.json`; normalization: `lstm_norm_stats.json`.
-- Training metrics (example from versioning): RMSE on lap prediction, AUC on cliff classification—the exact numbers evolve per training run (`model_versions.json`).
+---
 
-### 2. XGBoost — safety car probability (`backend/models/xgb_model.py`, `training/train_xgb.py`)
+### Model 1 — LSTM: Tyre Degradation & Lap Time
 
-- Features: lap progress, **circuit**, temps, **rain**, incidents, pack proximity, field tyre age, year, wind, tyre state, etc.
-- Outputs **SC probability** + **top SHAP factors** for explainability + **VSC vs full SC** ratio per circuit (`circuit_vsc_ratio.json`).
-- Artifacts: `xgb_sc_model*.pkl`, `xgb_feature_names.json`, `xgb_circuit_encoding.json`.
+```
+INPUT (per timestep in current stint):
+  ┌──────────────────────────────────────────────────────────┐
+  │  lap_time_seconds (circuit z-score)                      │
+  │  tyre_age                    fuel_load_kg                │
+  │  track_temp_celsius          air_temp_celsius            │
+  │  gap_ahead_seconds           gap_behind_seconds          │
+  │  safety_car_active           wind_speed                  │
+  │  fresh_tyre (0/1)                                        │
+  │  + compound embedding  →  4-dim learned vector           │
+  └──────────────────────────────────────────────────────────┘
+                         ↓
+              LSTM (128 hidden, 3 layers, dropout 0.25)
+                         ↓
+  ┌──────────────────────────────────────────────────────────┐
+  │  OUTPUT                                                  │
+  │  predicted_lap_time   (denormalized via circuit stats)   │
+  │  deg_rate_tenths      (tenths per lap, -2 to +8)         │
+  │  cliff_probability    (tyre performance cliff risk)      │
+  └──────────────────────────────────────────────────────────┘
+```
 
-### 3. PPO — pit strategy (`backend/models/rl_policy.py`, `training/train_rl.py`, `leclerc_race_env.py`)
+**Key design choices:**
+- Circuit-normalized lap times prevent the model from learning circuit identity instead of tyre physics
+- Compound embedded (not one-hot) so the model learns compound *similarity* (soft/medium more alike than soft/wet)
+- `fresh_tyre` flag accounts for used qualifying sets entering the race with pre-existing wear
+- Cliff probability override: if `tyre_age > threshold[compound]`, a rule-based floor ensures the model never outputs unrealistically low cliff risk on ancient tyres
 
-- **Gymnasium** env `LeclercRaceEnv`: samples real **session** trajectories from parquet, steps with LSTM/XGB-informed dynamics.
-- **Action space (4):** `STAY_OUT`, `PIT_SOFT`, `PIT_MEDIUM`, `PIT_HARD` (respects tyre allocation flags).
-- Observation: normalized vector from **FeatureBuilder** (13-dim in env; API observation aligned with policy input).
-- Artifact: `ppo_strategy_policy.zip` (or `_best`).
+**Training:** 7,775 laps, 2018–2024, filtered to clean laps (no inlaps/outlaps/SC laps). Early stopping on validation RMSE. Test RMSE: **4.17s**
 
-### 4. Weather models (`backend/models/weather_model.py`, `training/train_weather_model.py`)
+---
 
-- **`weather_lap_model.pkl`**: lap-time delta / condition signal from track temp, rain, wind, delta vs air, circuit encoding, lap fraction.
-- **`weather_sc_model.pkl`**: multiplies / adjusts **SC probability** when integrated in `/predict/safety_car`.
-- Exposes **weather_condition**, **weather_advisory**, **rain_risk_trend** to the UI and engineer.
+### Model 2 — XGBoost: Safety Car Probability
 
-### 5. Monte Carlo (`backend/simulation/monte_carlo.py`, `race_sim.py`)
+```
+INPUT (13 features):
+  ┌──────────────────────────────────────────────────────────┐
+  │  lap_number              laps_remaining                  │
+  │  circuit_encoded         track_temp         air_temp     │
+  │  rainfall                wind_speed         track_temp_delta│
+  │  incidents_so_far        field_tyre_stress_index         │
+  │  mean_tyre_age_field     historical_sc_rate              │
+  │  lap_fraction            year                            │
+  └──────────────────────────────────────────────────────────┘
+                         ↓
+        Calibrated XGBoost  ×0.70  +  Logistic Regression  ×0.30
+                         ↓
+  ┌──────────────────────────────────────────────────────────┐
+  │  OUTPUT                                                  │
+  │  sc_probability           (calibrated 0–1)               │
+  │  × weather_sc_multiplier  (from Weather Model)           │
+  │  = adjusted_sc_probability                               │
+  │                                                          │
+  │  vsc_ratio   (circuit historical VSC vs full SC rate)    │
+  │  top_shap_factors  (3 human-readable factors)            │
+  └──────────────────────────────────────────────────────────┘
+```
 
-- Rolls many futures from a **state** using simulator + policy; **finishing position distribution**, median, P10, P90.
-- **Strategy comparison** for pre-race: evaluates candidate pit sequences + compounds.
+**Key design choices:**
+- Ensemble (XGB + LR) significantly improves calibration for rare events — pure XGBoost tends to be overconfident
+- `field_tyre_stress_index = tyre_age / (compound_hardness + 1)` captures field-level blowout risk, not just Leclerc's tyres
+- `track_temp_delta` as a feature: dropping track temp = incoming rain = elevated SC risk (leading indicator)
+- Circuit VSC ratio prevents the model from treating VSC and full SC as identical — they have different strategic implications
 
-### 6. Radio / engineer LLM (`backend/engineer/radio_generator.py`)
+**Training:** AUC **0.74**, Brier score **0.04**
 
-- **Anthropic Claude** with a fixed **system prompt**: voice inspired by **Charles’s engineer**—human, direct, 2–3 sentences, real numbers only, **box** not pit, **deg** not vague wear.
-- **Message types** include: `RACE_START_SUMMARY`, `ROUTINE_PACE_NOTE`, `TYRE_ADVISORY`, `CLIFF_WARNING`, `PIT_WINDOW_OPEN`, `BOX_CALL`, `SC_ALERT`, `RAIN_STARTING`, `UNDERCUT_THREAT`, `RACE_END`, `PRERACE_BRIEF`, and more.
-- **Critical rule:** LLM does **not** choose strategy—it **narrates** structured context from your pipeline.
+---
 
-<p align="center">
-  <svg width="100%" height="3" viewBox="0 0 800 3" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><rect width="100%" height="100%" fill="#E10600" opacity="0.75"/></svg>
-</p>
+### Model 3 — PPO: Pit Strategy Policy
 
-## Data pipeline
+```
+OBSERVATION (13-dim, normalized 0–1):
+  ┌──────────────────────────────────────────────────────────┐
+  │  lap_fraction            laps_remaining_fraction         │
+  │  position / 20           compound / 4                    │
+  │  tyre_age / 60           fuel_load / 110                 │
+  │  gap_ahead / 30          gap_behind / 30                 │
+  │  sc_probability          cliff_probability               │
+  │  soft_available (0/1)    hard_available (0/1)            │
+  │  stint_number / 3                                        │
+  └──────────────────────────────────────────────────────────┘
 
-| Step | Script | Output |
-|------|--------|--------|
-| Collect | `backend/training/collect_data.py` | Per-race CSV under `backend/data/raw/` (FastF1 + lap gaps + weather) |
-| Clean / feature table | `backend/training/clean_data.py` | **`backend/data/processed/leclerc_career_laps.parquet`** (~7.7k+ laps, 2018–2024) |
-| Track maps | `backend/training/generate_track_maps.py` | **`backend/data/processed/circuit_track_maps.json`** |
-| Summary | (written during clean) | `dataset_summary.json` (row counts, compound mix, etc.) |
+ACTION SPACE (4 discrete):
+  0 = STAY_OUT
+  1 = PIT_SOFT
+  2 = PIT_MEDIUM
+  3 = PIT_HARD
 
-**Parquet columns** (non-exhaustive): `year`, `round`, `circuit_id`, `session_id`, `lap_number`, `lap_time_seconds`, `compound` / `compound_str`, `tyre_age`, `position`, `gap_ahead_seconds`, `gap_behind_seconds`, `safety_car_active`, pit flags, `fuel_load_kg`, `rainfall`, `track_temp_celsius`, `wind_speed`, `track_temp_delta`, `stint_number`, etc.
+REWARD STRUCTURE:
+  +120/85/60/40/28/18/12/8/5/3  →  final position P1–P10
+  +20   →  pitting under safety car
+  +0–5  →  optimal stint length (deviation from target)
+  +10   →  pitting for wet compound in rainfall
+  -30   →  pitting before lap 10 or tyre_age < 12
+  -15   →  tyre cliff event
+  +2    →  per position gained per lap
+```
 
-**Supporting JSON in `backend/data/models/`:** `circuit_lap_stats.json`, `circuit_pit_loss.json`, `circuit_battle_intensity.json`, `mean_tyre_age_by_lap.json`, `model_versions.json`, etc.
+**Training environment:** `LeclercRaceEnv` samples real race sessions, uses LSTM + XGBoost for dynamics. Trained with SB3 PPO for 1M steps. `ep_rew_mean` target: >35.
 
-<p align="center">
-  <svg width="100%" height="3" viewBox="0 0 800 3" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><rect width="100%" height="100%" fill="#15151E"/></svg>
-</p>
+---
 
-## Backend (FastAPI)
+### Model 4 — Weather: Condition Impact
 
-**Entry:** `backend/main.py` (loads `backend/.env`).
+```
+INPUT:
+  track_temp, air_temp, temp_delta (track-air),
+  rainfall, wind_speed, track_temp_delta,
+  is_cool_track, is_hot_track,
+  circuit_encoded, lap_fraction
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| GET | `/health` | API + which models loaded + parquet row count |
-| GET | `/races` | List races (year, round, circuit, finish position, total laps) |
-| GET | `/race/{year}/{round}/laps` | Full lap list for replay |
-| GET | `/circuit/track_map/{circuit_id}` | Track polyline / metadata for map |
-| POST | `/predict/next_lap` | LSTM + weather-adjusted next lap |
-| POST | `/predict/safety_car` | XGB SC probability + SHAP + weather multiplier |
-| GET | `/predict/weather/{circuit_id}` | Standalone weather advisory |
-| POST | `/strategy/recommend` | PPO action + optional Monte Carlo distribution |
-| POST | `/engineer/message` | Claude radio line from context |
-| GET | `/engineer/prerace_strategy` | Pre-race brief + strategy options |
-| GET | `/debug/model_versions` | Active + history of trained artifacts |
+         ↓                        ↓
+  GradBoost Regressor       GradBoost Regressor
+  (lap time delta)          (SC risk multiplier)
 
-**Imports:** Run as package from repo root so `backend.*` resolves (see run commands below).
+OUTPUT:
+  weather_lap_delta      →  added to LSTM lap time prediction
+  weather_sc_multiplier  →  multiplied onto XGBoost SC probability
+  weather_condition      →  "dry" / "damp" / "wet" / "extreme"
+  weather_advisory       →  plain-English alert (no Claude needed)
+  rain_risk_trend        →  "stable" / "increasing" / "decreasing"
+```
 
-<p align="center">
-  <svg width="100%" height="4" viewBox="0 0 800 4" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><defs><linearGradient id="leclercGrad3" x1="0%" x2="100%"><stop offset="0%" stop-color="#15151E"/><stop offset="100%" stop-color="#E10600"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#leclercGrad3)"/></svg>
-</p>
+The weather model acts as a **correction layer** on top of the other models. A sudden track temp drop of >3°C in one lap signals incoming rain — the SC multiplier spikes before the rain even registers.
 
-## Frontend (React + Vite)
+---
 
-**Stack:** React 18, TypeScript, Vite, Tailwind, **Zustand** (`raceStore`), **TanStack Query** (where used), **Recharts**, **Framer Motion**, **Axios**.
+### Model 5 — RadioGenerator: Claude
 
-| Path | Role |
-|------|------|
-| `src/App.tsx` | Landing sections + scroll into **dashboard** |
-| `src/pages/RaceDashboard.tsx` | Main grid: race picker, replay controls, charts, map, engineer |
-| `src/hooks/useRaceReplay.ts` | Lap stepping + API calls (predict, strategy, engineer, SC) |
-| `src/store/raceStore.ts` | Selected race, laps, live ML state |
-| `src/api/client.ts` | Base URL from `VITE_API_BASE_URL`, lap mapping, API helpers |
-| `src/types/index.ts` | Shared TS types |
-| **Homepage** | `Hero`, `StatsStrip`, `FeatureSection`, `EnterDashboard` |
-| **Telemetry** | `LapTimeChart`, `TyreDegradationCard`, `PositionTracker` |
-| **Strategy** | `StrategyTimeline`, `PitWindowCard`, `PositionDistribution` |
-| **Safety** | `SafetyCarGauge` |
-| **Track** | `TrackMap` (circuit outline + position) |
-| **Engineer** | `EngineerPanel`, `RadioMessage`, `BoxBoxBanner`, `PreRaceModal` |
-| `src/components/layout/Header.tsx` | Dashboard header |
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    WHAT CLAUDE RECEIVES                              │
+│                                                                      │
+│  message_type: BOX_CALL                                              │
+│                                                                      │
+│  data (filtered to only what's relevant for this type):             │
+│    position: 3                                                       │
+│    gap_ahead: 1.8s                                                   │
+│    gap_behind: 4.2s                                                  │
+│    tyre_age: 24 laps                                                 │
+│    recommended_action: PIT_MEDIUM   ← from PPO                      │
+│    median_finish: P2                ← from Monte Carlo              │
+│    circuit_name: Bahrain                                             │
+│                                                                      │
+│  system_prompt: Xavier Marcos Padros persona, voice rules,          │
+│                 forbidden words, length constraints (2–3 sentences)  │
+│                                                                      │
+├─────────────────────────────────────────────────────────────────────┤
+│                    WHAT CLAUDE OUTPUTS                               │
+│                                                                      │
+│  "Box this lap, box this lap. Mediums going on.                     │
+│   Gap behind is 4.2 — you exit in clean air, P2 on merit."         │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
-**UX theme:** Dashboard uses CSS variables (`--dash-bg`, `--dash-surface`, `--dash-border`, etc.) for a **clean, light, data-dense** look—Ferrari **#E10600** accents show up in UI elements where the app highlights calls to action (e.g. box box energy), keeping the page mostly **white / off-white**.
+**Claude does NOT decide strategy.** It receives structured data from the ML pipeline and narrates it in authentic team radio style. The system prompt enforces: real numbers only, no invented facts, max 3 sentences, F1 vocabulary ("box" not "pit", "deg" not "tyre wear").
 
-<p align="center">
-  <svg width="100%" height="3" viewBox="0 0 800 3" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><rect width="100%" height="100%" fill="#E10600"/></svg>
-</p>
+---
 
-## Repository file structure
+## How It All Connects
+
+This is the full per-lap inference chain during a replay:
+
+```
+lap N data arrives from parquet
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  useRaceReplay.ts  (frontend state machine)                          │
+│                                                                      │
+│  1. Build current_state dict from lap data                           │
+│     + weather fields + circuit stats + stint history                 │
+└────────────────┬────────────────────────────────────────────────────┘
+                 │  parallel API calls
+        ┌────────┼────────────┬────────────────────┐
+        ▼        ▼            ▼                    ▼
+   POST          POST         POST                GET
+   /predict/     /predict/    /strategy/          /predict/
+   next_lap      safety_car   recommend           weather/{id}
+        │        │            │                    │
+        ▼        ▼            ▼                    ▼
+   LSTM +     XGBoost +    PPO +              Weather
+   weather    weather      Monte Carlo        Model
+   delta      multiplier   (50 sims)
+        │        │            │                    │
+        └────────┴────────────┴────────────────────┘
+                              │
+                    assemble full context
+                              │
+                              ▼
+                    POST /engineer/message
+                              │
+                    RadioGenerator → Claude API
+                              │
+                              ▼
+              "Gap behind is 3.2, stable. Deg is 0.2 tenths.
+               We're in good shape — push through sector 2."
+                              │
+                              ▼
+                    displayed in Engineer Panel
+                    with urgency color coding
+                    (ROUTINE / ADVISORY / URGENT)
+```
+
+---
+
+## Data Pipeline
+
+```
+FastF1 API  ─────────────────────────────────────────────────────────►
+                                                                      │
+  collect_data.py                                                      │
+  ───────────────                                                      │
+  · Downloads race sessions 2018–2024 for Charles Leclerc             │
+  · Extracts per-lap: lap time, compound, tyre age, position,         │
+    gaps, fuel estimate, weather (temp, rain, wind), SC flags         │
+  · Joins weather_data by timestamp (merge_asof)                      │
+  · Saves to backend/data/raw/*.csv                                   │
+                                                                      │
+  clean_data.py                                                        │
+  ─────────────                                                        │
+  · Normalizes compound names (HYPERSOFT → SOFT etc.)                 │
+  · Computes: fuel_load_kg, lap_time_normalized (circuit z-score)     │
+  · Computes: track_temp_delta, field_tyre_stress_index               │
+  · Computes: fresh_tyre, stint_number                                │
+  · Saves circuit stats: circuit_lap_stats.json                       │
+  · Saves circuit pit loss: circuit_pit_loss.json                     │
+  · Saves battle intensity: circuit_battle_intensity.json             │
+  · Saves VSC ratios: circuit_vsc_ratio.json                          │
+  · Output: leclerc_career_laps.parquet                               │
+                                                                      ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  leclerc_career_laps.parquet                                         │
+│  7,775 rows · 34 circuits · 7 seasons (2018–2024)                   │
+│                                                                      │
+│  year  round  circuit_id  lap_number  lap_time_seconds  compound    │
+│  tyre_age  position  gap_ahead  gap_behind  fuel_load_kg            │
+│  rainfall  track_temp  air_temp  wind_speed  track_temp_delta       │
+│  safety_car_active  pitted_this_lap  stint_number  fresh_tyre       │
+│  field_tyre_stress_index  circuit_lt_mean  circuit_lt_std  ...      │
+└─────────────────────────────────────────────────────────────────────┘
+
+  generate_track_maps.py
+  ──────────────────────
+  · Downloads bacinger/f1-circuits GeoJSON (real GPS coordinates)
+  · Maps each parquet circuit_id to GeoJSON circuit id
+  · Normalizes GPS coords to SVG space (preserving aspect ratio)
+  · Inverts Y axis (geographic lat increases up, SVG Y increases down)
+  · Saves drs_zones_count per circuit from official FIA data
+  · Output: circuit_track_maps.json (300–500 SVG points per circuit)
+```
+
+**Dataset stats:**
+
+| Season | Laps | Notes |
+|--------|------|-------|
+| 2018 | 1,039 | First Ferrari season |
+| 2019 | 1,141 | |
+| 2020 | 795 | COVID-shortened calendar |
+| 2021 | 1,120 | |
+| 2022 | 1,153 | New regs, multiple wins |
+| 2023 | 1,131 | |
+| 2024 | 1,396 | Monaco GP win included |
+| **Total** | **7,775** | **34 circuits** |
+
+---
+
+## Backend API
+
+All endpoints are served from `backend/main.py` (FastAPI). The `ModelRegistry` loads everything at startup.
+
+| Method | Path | What it does |
+|--------|------|-------------|
+| `GET` | `/health` | Model load status, parquet row count, cache stats |
+| `GET` | `/races` | All Leclerc races (year, round, circuit, finish position) |
+| `GET` | `/race/{year}/{round}/laps` | Full lap data for a race (57+ fields per lap) |
+| `GET` | `/circuit/track_map/{circuit_id}` | SVG polyline + viewBox + DRS zone count |
+| `POST` | `/predict/next_lap` | LSTM inference → predicted lap time, deg rate, cliff prob |
+| `POST` | `/predict/safety_car` | XGBoost ensemble → SC prob, VSC ratio, SHAP factors |
+| `GET` | `/predict/weather/{circuit_id}` | Weather model → condition, lap delta, SC multiplier |
+| `POST` | `/strategy/recommend` | PPO → action + Monte Carlo finishing distribution |
+| `POST` | `/engineer/message` | Claude → team radio message from ML context |
+| `GET` | `/engineer/prerace_strategy` | Pre-race brief with strategy options |
+| `GET` | `/debug/model_versions` | Training history and active model artifacts |
+
+---
+
+## Frontend Dashboard
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│  HEADER  — Lap counter · SC bar · Rain indicator · Race win glow       │
+├──────────────────────────────────────────────────────────────────────  │
+│                                                                        │
+│  ┌──────────────┐  ┌──────────────────────────┐  ┌─────────────────┐  │
+│  │ RACE SELECT  │  │                          │  │  TEAM RADIO     │  │
+│  │              │  │    CIRCUIT MAP           │  │                 │  │
+│  │ Season ▼     │  │    (real GPS coords)     │  │ ┌─────────────┐ │  │
+│  │ Race ▼       │  │                          │  │ │ BOX CALL    │ │  │
+│  │              │  │    ● car dot animates    │  │ │ LAP 28      │ │  │
+│  │ [LOAD RACE]  │  │      around track        │  │ └─────────────┘ │  │
+│  │              │  │      from S/F line       │  │ ┌─────────────┐ │  │
+│  ├──────────────┤  │      each lap            │  │ │ ADVISORY    │ │  │
+│  │ LAP CONTROLS │  │                          │  │ │ LAP 27      │ │  │
+│  │              │  │                          │  │ └─────────────┘ │  │
+│  │ ◄ PREV NEXT► │  └──────────────────────────┘  │ ┌─────────────┐ │  │
+│  │ LAP 28 / 57  │                                 │ │ ROUTINE     │ │  │
+│  │ ▶ PLAY LAP   │                                 │ │ LAP 26      │ │  │
+│  │ 1× ▼ SPEED   │                                 │ └─────────────┘ │  │
+│  └──────────────┘                                 │   (scrollable)  │  │
+│                                                   └─────────────────┘  │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  LAP TIMES chart  │  TYRE DEG (stint delta)  │  POSITION TRACKER│   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  STRATEGY TIMELINE (all stints, completed + future)             │   │
+│  │  ██████████████████████▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒              │   │
+│  │  SOFT (22 laps)       MED (18 laps)      HARD (future)         │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│  ┌────────────────────────────┐  ┌──────────────────────────────────┐  │
+│  │  SAFETY CAR GAUGE          │  │  SC SHAP FACTORS                 │  │
+│  │  ████░░░░░░ 35% risk       │  │  · Wet conditions ↑              │  │
+│  └────────────────────────────┘  └──────────────────────────────────┘  │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+**Key frontend features:**
+- **BOX BOX banner** — slides down with compound color when Leclerc actually pits in historical data, auto-dismisses after 3 seconds
+- **Car animation** — snaps to start/finish line on each lap change, animates at correct speed (adjusts for 1×/2×/5× playback)
+- **Tyre legend** — `● SOFT  ● MED  ● HARD  ● INTER  ● WET` below strategy timeline
+- **Rain indicator** — teardrop icon fades in when `rainfall = 1`
+- **Race win glow** — Ferrari red header glow + "RACE WIN" for P1 finishes
+
+**Tech stack:** React 18, TypeScript, Vite, Zustand, Recharts, Framer Motion, Axios, Tailwind
+
+---
+
+## File Structure
 
 ```
 ai_race_engineer/
+│
 ├── README.md
 ├── docker-compose.yml
-├── test_api.py                          # Quick API smoke tests (if present)
 │
 ├── backend/
-│   ├── main.py                          # FastAPI app, routes, lifespan
+│   ├── main.py                          ← FastAPI app, all endpoints, lifespan
 │   ├── requirements.txt
 │   ├── Dockerfile
-│   ├── .env                             # ANTHROPIC_API_KEY, optional paths
-│   ├── utils.py
+│   ├── .env                             ← ANTHROPIC_API_KEY (never commit this)
 │   │
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── model_registry.py            # Loads all models + sim + radio + maps
-│   │   ├── lstm_model.py
-│   │   ├── xgb_model.py
-│   │   ├── rl_policy.py
-│   │   └── weather_model.py
+│   ├── models/                          ← Inference wrappers (loaded at startup)
+│   │   ├── model_registry.py            ← Loads and wires all models
+│   │   ├── lstm_model.py                ← LSTM wrapper + denormalization
+│   │   ├── xgb_model.py                 ← XGBoost ensemble + SHAP
+│   │   ├── rl_policy.py                 ← PPO wrapper + shape safety check
+│   │   └── weather_model.py             ← Weather correction models
 │   │
 │   ├── features/
-│   │   ├── feature_builder.py           # LSTM sequences + RL observation vector
-│   │   └── validate_features.py
+│   │   ├── feature_builder.py           ← LSTM sequence builder + RL observation
+│   │   └── validate_features.py         ← Train-serve consistency check
 │   │
 │   ├── simulation/
-│   │   ├── race_sim.py                  # Roll laps with loaded nets
-│   │   └── monte_carlo.py               # Distributions + strategy compare
+│   │   ├── race_sim.py                  ← Lap-by-lap simulator
+│   │   └── monte_carlo.py               ← Parallel 50-sim finishing distribution
 │   │
 │   ├── engineer/
-│   │   └── radio_generator.py           # Claude prompts + message typing
+│   │   └── radio_generator.py           ← Claude prompts, message types, priority
 │   │
-│   ├── training/
-│   │   ├── collect_data.py              # FastF1 → raw CSV
-│   │   ├── clean_data.py                # → parquet
-│   │   ├── generate_track_maps.py
-│   │   ├── train_lstm.py
-│   │   ├── train_xgb.py
-│   │   ├── train_weather_model.py
-│   │   ├── train_rl.py                  # PPO (SB3)
-│   │   ├── leclerc_race_env.py
-│   │   └── model_versioning.py
+│   ├── training/                        ← Run these to build from scratch
+│   │   ├── collect_data.py              ← FastF1 → raw CSVs
+│   │   ├── clean_data.py                ← CSVs → parquet + JSON artifacts
+│   │   ├── generate_track_maps.py       ← GeoJSON → circuit_track_maps.json
+│   │   ├── train_lstm.py                ← Trains TyreDegradationLSTM
+│   │   ├── train_xgb.py                 ← Trains XGBoost + LR ensemble
+│   │   ├── train_weather_model.py       ← Trains weather correction models
+│   │   ├── train_rl.py                  ← Trains PPO policy (SB3)
+│   │   ├── leclerc_race_env.py          ← Gymnasium environment
+│   │   └── model_versioning.py          ← Timestamps + metrics tracking
 │   │
-│   ├── data/
-│   │   ├── raw/                         # CSVs, f1_cache, geojson
-│   │   ├── processed/                   # leclerc_career_laps.parquet, track maps, summaries
-│   │   └── models/                      # .pt, .pkl, .zip, JSON sidecars
-│   │
-│   └── notebooks/
-│       └── 01_exploration.ipynb
+│   └── data/
+│       ├── raw/                         ← FastF1 cache + CSVs (gitignored)
+│       ├── processed/
+│       │   ├── leclerc_career_laps.parquet   ← Main dataset
+│       │   └── circuit_track_maps.json        ← SVG circuit coordinates
+│       └── models/
+│           ├── lstm_weights.pt + lstm_config.json + lstm_norm_stats.json
+│           ├── xgb_sc_model.pkl + lr_sc_model.pkl + xgb_feature_names.json
+│           ├── ppo_strategy_policy.zip
+│           ├── weather_lap_model.pkl + weather_sc_model.pkl
+│           ├── circuit_lap_stats.json         ← Per-circuit mean/std
+│           ├── circuit_pit_loss.json          ← Data-driven pit time loss
+│           ├── circuit_battle_intensity.json  ← Data-driven midfield gaps
+│           ├── circuit_vsc_ratio.json         ← VSC vs full SC per circuit
+│           └── model_versions.json            ← Training history + active ptr
 │
 └── frontend/
-    ├── Dockerfile
-    ├── index.html
     ├── package.json
     ├── vite.config.ts
-    ├── tailwind.config.ts
-    ├── tsconfig.json
-    ├── .env                             # VITE_API_BASE_URL=http://localhost:8000
+    ├── .env                             ← VITE_API_BASE_URL (never commit)
     └── src/
-        ├── main.tsx
-        ├── App.tsx
-        ├── index.css
-        ├── vite-env.d.ts
-        ├── api/client.ts
-        ├── store/raceStore.ts
-        ├── hooks/useRaceReplay.ts, useScrollReveal.ts
-        ├── types/index.ts
-        ├── pages/RaceDashboard.tsx
+        ├── App.tsx                      ← Landing + scroll to dashboard
+        ├── pages/RaceDashboard.tsx      ← Main 3-column grid
+        ├── hooks/
+        │   └── useRaceReplay.ts         ← Lap stepping + all API calls
+        ├── store/raceStore.ts           ← Zustand: laps, messages, pit events
+        ├── api/client.ts                ← Axios instance + typed helpers
+        ├── types/index.ts               ← Shared TypeScript types
         └── components/
-            ├── homepage/, layout/, common/
-            ├── dashboard/, telemetry/, strategy/, safety/
-            ├── track/, engineer/
-            └── ...
+            ├── layout/Header.tsx
+            ├── homepage/                ← Hero, StatsStrip, FeatureSection
+            ├── dashboard/               ← RaceSelectionCard
+            ├── telemetry/               ← LapTimeChart, TyreDegCard, PositionTracker
+            ├── strategy/                ← StrategyTimeline
+            ├── safety/                  ← SafetyCarGauge
+            ├── track/                   ← TrackMap (animated car dot)
+            ├── engineer/                ← EngineerPanel, RadioMessage, BoxBoxBanner
+            └── common/                  ← TyreLegend
 ```
 
-<p align="center">
-  <svg width="100%" height="3" viewBox="0 0 800 3" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><rect width="100%" height="100%" fill="#15151E"/><rect x="0" width="12%" height="100%" fill="#E10600"/></svg>
-</p>
+---
 
-## Setup & run
+## Setup & Run
+
+### Prerequisites
+
+- Python 3.11+
+- Node.js 18+
+- An [Anthropic API key](https://console.anthropic.com) (for engineer radio)
 
 ### Backend
 
 ```bash
+# Clone and install
+git clone https://github.com/vishwakvel/ai_race_engineer.git
 cd ai_race_engineer
+
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r backend/requirements.txt
+
+# Set your API key
+echo "ANTHROPIC_API_KEY=sk-ant-your-key-here" > backend/.env
+
+# Run (from repo root — important for package imports)
+uvicorn backend.main:app --reload --port 8000
 ```
 
-Copy `backend/.env` and set **`ANTHROPIC_API_KEY`** for engineer radio. Ensure **`backend/data/processed/leclerc_career_laps.parquet`** and **`backend/data/models/`** artifacts exist (or run the training pipeline below).
-
-From **repository root**:
-
-```bash
-uvicorn backend.main:app --reload
-```
-
-- API: **http://localhost:8000**  
-- OpenAPI docs: **http://localhost:8000/docs**
-
-Optional env:
-
-- **`DATA_DIR`** — folder containing `leclerc_career_laps.parquet` (default: `backend/data/processed/`).
-- **`MODEL_DIR`** — override for `backend/data/models`.
+API docs available at **http://localhost:8000/docs**
 
 ### Frontend
 
 ```bash
-cd frontend && npm install
+cd frontend
+npm install
+echo "VITE_API_BASE_URL=http://localhost:8000" > .env
 npm run dev
 ```
 
-- App: **http://localhost:5173**  
-- Set `VITE_API_BASE_URL` in `frontend/.env` if the API is not on `http://localhost:8000`.
+App available at **http://localhost:5173**
 
-<p align="center">
-  <svg width="100%" height="4" viewBox="0 0 800 4" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><rect width="100%" height="100%" fill="#E10600" opacity="0.9"/></svg>
-</p>
+### Optional environment overrides
 
-## Training order & artifacts
+```bash
+DATA_DIR=/path/to/parquet/folder    # default: backend/data/processed
+MODEL_DIR=/path/to/models/folder    # default: backend/data/models
+F1_CACHE_DIR=/path/to/f1/cache      # default: backend/data/raw/f1_cache
+```
 
-1. **`python -m backend.training.collect_data`** — downloads/saves raw laps (FastF1 cache under `data/raw/f1_cache` by default).
-2. **`python -m backend.training.clean_data`** — builds **`leclerc_career_laps.parquet`**.
-3. **`python -m backend.training.train_lstm`** → `lstm_weights*.pt`, `lstm_config.json`, `lstm_norm_stats.json`.
-4. **`python -m backend.training.train_xgb`** → `xgb_sc_model*.pkl` + feature JSON.
-5. **`python -m backend.training.train_weather_model`** → `weather_lap_model.pkl`, `weather_sc_model.pkl`.
-6. **`python -m backend.training.train_rl`** → `ppo_strategy_policy.zip`.
+---
 
-**Versioning:** `model_versions.json` tracks **active** weights and **history** (timestamps, RMSE, AUC, Brier, etc.). Symlink or copy active files to names the registry expects (`ppo_strategy_policy.zip`, `lstm_weights.pt`, `xgb_sc_model.pkl`) or adjust loading paths in code.
+## Training Pipeline
 
-Track maps: **`python -m backend.training.generate_track_maps`** (as documented in that module).
+If you want to build everything from scratch (this takes several hours for the full pipeline):
 
-<p align="center">
-  <svg width="100%" height="3" viewBox="0 0 800 3" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><rect width="100%" height="100%" fill="#15151E"/></svg>
-</p>
+```bash
+# 1. Collect raw lap data from FastF1 (2018–2024)
+#    Downloads ~1GB of session data, cached for reuse
+python -m backend.training.collect_data
 
-## Environment variables
+# 2. Build the main parquet dataset + all JSON artifacts
+#    ~1 minute. Outputs: leclerc_career_laps.parquet
+python -m backend.training.clean_data
 
-| Variable | Where | Purpose |
-|----------|-------|---------|
-| `ANTHROPIC_API_KEY` | `backend/.env` | Claude for `/engineer/message` and pre-race brief |
-| `VITE_API_BASE_URL` | `frontend/.env` | Backend origin for axios |
-| `DATA_DIR` | backend | Parquet location |
-| `MODEL_DIR` | backend | Models + JSON sidecars |
-| `F1_CACHE_DIR` | optional | FastF1 cache path |
+# 3. Generate real circuit track maps from GeoJSON
+#    Downloads bacinger/f1-circuits and processes 34 circuits
+python -m backend.training.generate_track_maps
 
-<p align="center">
-  <svg width="100%" height="3" viewBox="0 0 800 3" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><rect width="100%" height="100%" fill="#E10600"/></svg>
-</p>
+# 4. Validate feature consistency (run after every retrain)
+python -m backend.features.validate_features
+# Must print: "PASS — feature consistency OK"
+
+# 5. Train the LSTM tyre model (~30–60 minutes)
+python -m backend.training.train_lstm
+# Target: test RMSE < 3.5s
+
+# 6. Train XGBoost safety car model (~5 minutes)
+python -m backend.training.train_xgb
+# Target: AUC > 0.72, Brier < 0.05
+
+# 7. Train weather correction models (~2 minutes)
+python -m backend.training.train_weather_model
+
+# 8. Train PPO strategy policy (~1–4 hours)
+#    Watch ep_rew_mean — it should reach > 35
+python -m backend.training.train_rl
+
+# 9. Restart backend to load new models
+kill $(lsof -ti :8000) && uvicorn backend.main:app --reload --port 8000
+```
+
+**Model versioning:** Every training run saves a timestamped copy of the model and logs metrics to `model_versions.json`. If a new training run produces worse results, the previous weights are preserved. Check training history at `GET /debug/model_versions`.
+
+---
+
+## Environment Variables
+
+| Variable | File | Required | Purpose |
+|----------|------|----------|---------|
+| `ANTHROPIC_API_KEY` | `backend/.env` | ✅ Yes | Claude for `/engineer/message` |
+| `VITE_API_BASE_URL` | `frontend/.env` | ✅ Yes | Backend URL for axios |
+| `DATA_DIR` | shell / backend | Optional | Override parquet location |
+| `MODEL_DIR` | shell / backend | Optional | Override model artifacts location |
+| `F1_CACHE_DIR` | shell / backend | Optional | Override FastF1 cache path |
+
+> ⚠️ **Never commit `.env` files.** Both are in `.gitignore`. Your Anthropic API key is sensitive — if it ends up in git history, rotate it immediately at [console.anthropic.com](https://console.anthropic.com).
+
+---
 
 ## Docker
 
@@ -351,11 +715,40 @@ Track maps: **`python -m backend.training.generate_track_maps`** (as documented 
 docker compose up --build
 ```
 
-- **Backend:** port **8000**, mounts `./backend/data` → `/app/data`.
-- **Frontend:** port **5173**, depends on backend.
+This starts both services:
+- **Backend** on port **8000** — mounts `./backend/data` → `/app/data`
+- **Frontend** on port **5173** — depends on backend service
 
-Dockerfiles live at **`backend/Dockerfile`** and **`frontend/Dockerfile`**.
+For production deployment, set `ANTHROPIC_API_KEY` in a `.env` file at the repo root before running compose.
 
-<p align="center">
-  <svg width="100%" height="4" viewBox="0 0 800 4" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><defs><linearGradient id="leclercGrad4" x1="0%" x2="100%"><stop offset="0%" stop-color="#E10600"/><stop offset="100%" stop-color="#15151E"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#leclercGrad4)"/></svg>
-</p>
+---
+
+## Message Types Reference
+
+The engineer generates different messages based on race situation. Priority order (highest to lowest):
+
+| Type | Urgency | Trigger |
+|------|---------|---------|
+| `RACE_END` | — | Final lap completed |
+| `SC_BOX_CALL` | 🔴 URGENT | Safety car deployed + pit recommended |
+| `RAIN_STARTING` | 🔴 URGENT | `rainfall` flips from 0 → 1 |
+| `BOX_CALL` | 🔴 URGENT | PPO recommends pit, tyre age ≥ 18, confidence > 0.78 |
+| `CLIFF_WARNING` | 🟡 ADVISORY | `cliff_probability` > 0.35 |
+| `SC_ALERT` | 🟡 ADVISORY | `sc_probability` > 0.40 |
+| `POSITION_GAINED` | ⚪ ROUTINE | `position` improved vs previous lap |
+| `DRS_AVAILABLE` | ⚪ ROUTINE | `gap_ahead` ≤ 1.0s, DRS zones > 0 |
+| `RAIN_STOPPING` | ⚪ ROUTINE | `rainfall` flips from 1 → 0 |
+| `TYRE_ADVISORY` | ⚪ ROUTINE | `deg_rate` > 0.25 tenths/lap |
+| `CLOSE_AHEAD` | ⚪ ROUTINE | `gap_ahead` ≤ 1.2s |
+| `PRESSURE_BEHIND` | ⚪ ROUTINE | `gap_behind` ≤ 0.8s |
+| `ROUTINE_PACE_NOTE` | ⚪ ROUTINE | Default (every 2–3 laps) |
+
+---
+
+<div align="center">
+
+**Built with** PyTorch · XGBoost · Stable-Baselines3 · FastAPI · React · Anthropic Claude · FastF1
+
+<img src="https://img.shields.io/badge/Made%20for-Charles%20Leclerc-E10600?style=flat-square" />
+
+</div>
