@@ -660,8 +660,6 @@ kill $(lsof -ti :8000) && uvicorn backend.main:app --reload --port 8000
 | `MODEL_DIR` | shell / backend | Optional | Override model artifacts location |
 | `F1_CACHE_DIR` | shell / backend | Optional | Override FastF1 cache path |
 
-> ⚠️ **Never commit `.env` files.** Both are in `.gitignore`. Your Anthropic API key is sensitive — if it ends up in git history, rotate it immediately at [console.anthropic.com](https://console.anthropic.com).
-
 ---
 
 ## Docker
