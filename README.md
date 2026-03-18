@@ -2,9 +2,7 @@
 
 # LeclercAI
 
-**The AI race engineer Charles deserves** *(fan project — not affiliated with Ferrari, F1, or Charles Leclerc)*
-
-<img src="https://img.shields.io/badge/Ferrari%20red-E10600?style=flat-square" alt="Ferrari red" /> <img src="https://img.shields.io/badge/F1%20carbon-15151E?style=flat-square&labelColor=15151E&color=E10600" alt="F1 dark" /> <img src="https://img.shields.io/badge/%2316-DC0000?style=flat-square" alt="#16" />
+**The AI race engineer Charles deserves**
 
 </div>
 
@@ -361,15 +359,3 @@ Dockerfiles live at **`backend/Dockerfile`** and **`frontend/Dockerfile`**.
 <p align="center">
   <svg width="100%" height="4" viewBox="0 0 800 4" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><defs><linearGradient id="leclercGrad4" x1="0%" x2="100%"><stop offset="0%" stop-color="#E10600"/><stop offset="100%" stop-color="#15151E"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#leclercGrad4)"/></svg>
 </p>
-
-## Disclaimer
-
-This is an **educational / fan project**. It is **not** affiliated with Formula 1, the FIA, Scuderia Ferrari, or Charles Leclerc. Model outputs are **not** real race engineering advice. **Never** use this for actual motorsport decisions.
-
----
-
-<div align="center">
-
-<sub>Built with too much love for #16 · **Rosso corsa** accents · Stay out unless the PPO says otherwise · *Is it called LeclercAI? Sure. Does it box this lap? Ask the policy.*</sub>
-
-</div>
