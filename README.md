@@ -7,7 +7,7 @@
               ╚══════╝╚══════╝ ╚═════╝╚══════╝╚══════╝╚═╝  ╚═╝ ╚═════╝   ╚═╝  ╚═╝╚═╝
 ```
 
-*Imagine watching Charles Leclerc lose a race because his engineer poor communication and strategy. LeclercAI is an AI race engineer trained on seven years of Charles's real race data. It's the race engineer Charles Leclerc truly deserves.*
+*Imagine watching Charles Leclerc lose a race because his engineer poor communication and strategy. LeclercAI is an AI race engineer trained on 7 years of his real race data. It's the race engineer Charles Leclerc truly deserves.*
 
 ---
 
