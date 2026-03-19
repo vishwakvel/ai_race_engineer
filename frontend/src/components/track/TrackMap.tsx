@@ -155,7 +155,7 @@ export function TrackMap({
   const arc = useMemo(() => (pts.length >= 2 ? buildArcLengths(pts) : []), [pts]);
 
   const carPos = useMemo(() => {
-    if (pts.length < 2 || currentLap < 1) return null;
+    if (pts.length < 2 || currentLap < 0) return null;
     const totalLen = arc[arc.length - 1] ?? 0;
     const d = Math.max(0, Math.min(1, lapProgress01)) * totalLen;
     return pointAtDistance(pts, arc, d);
@@ -197,7 +197,7 @@ export function TrackMap({
   }, [circuitId]);
 
   const completedPoints =
-    pts.length >= 2 && currentLap >= 1 && lapProgress01 > 0
+    pts.length >= 2 && currentLap >= 0 && lapProgress01 > 0
       ? pointsUpToDistance(
           pts,
           arc,

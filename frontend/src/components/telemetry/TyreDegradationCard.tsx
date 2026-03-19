@@ -111,7 +111,7 @@ export function TyreDegradationCard() {
               </linearGradient>
             </defs>
             <XAxis
-              dataKey="age"
+              dataKey="lap"
               tick={{ fontFamily: "var(--font-mono)", fontSize: 10, fill: "var(--dash-text-secondary)" }}
               axisLine={false}
               tickLine={false}

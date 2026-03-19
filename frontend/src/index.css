@@ -70,16 +70,21 @@ body {
   background: var(--home-bg);
   color: var(--home-text-primary);
   font-family: var(--font-display);
+  /* overflow:hidden|auto on ancestors breaks position:sticky for dashboard team radio */
+  overflow-x: visible;
+  overflow-y: visible;
 }
 
 #root {
   min-height: 100vh;
+  overflow: visible;
 }
 
 #dashboard {
   position: relative;
   min-height: 100vh;
   background: var(--dash-bg);
+  overflow: visible;
 }
 
 /* Remove default focus outlines; use custom where needed */
@@ -119,13 +124,18 @@ input {
   }
 }
 
-.engineer-feed::-webkit-scrollbar {
-  width: 2px;
+.radio-feed::-webkit-scrollbar {
+  width: 3px;
 }
-.engineer-feed::-webkit-scrollbar-track {
+.radio-feed::-webkit-scrollbar-track {
   background: transparent;
 }
-.engineer-feed::-webkit-scrollbar-thumb {
-  background: var(--dash-border-bright);
-  border-radius: 1px;
+.radio-feed::-webkit-scrollbar-thumb {
+  background: #333355;
+  border-radius: 2px;
+}
+
+.radio-feed {
+  scrollbar-width: thin;
+  scrollbar-color: #333355 transparent;
 }

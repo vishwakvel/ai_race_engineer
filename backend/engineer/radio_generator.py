@@ -529,6 +529,23 @@ CRITICAL:
             message_text = message_text.strip().strip('"').strip("'").strip()
             message_text = re.sub(r"(\d)\s*\.\s*(\d)", r"\1.\2", message_text)
 
+            # Sometimes the model returns meta-structured outputs like:
+            # "**RADIO MESSAGE:** ... --- **WHY THIS WORKS:** - ..."
+            # We only want the actual radio narration.
+            normalized = re.sub(r"\*\*", "", message_text)
+            lower_norm = normalized.lower()
+            if "radio message" in lower_norm:
+                normalized = re.sub(r"(?is).*radio message\\s*:?\\s*", "", normalized)
+                lower_norm = normalized.lower()
+            if "why this works" in lower_norm:
+                normalized = re.split(r"(?is)why this works", normalized)[0].strip()
+            # Remove common markdown separators left behind.
+            normalized = re.sub(r"(?m)^\\s*-{2,}\\s*$", "", normalized).strip()
+            # Remove trailing separators like "---" that can remain after stripping sections.
+            normalized = re.sub(r"\\s*---\\s*$", "", normalized).strip()
+            if normalized:
+                message_text = normalized
+
             # Enforce sentence limit (max 3) without breaking decimals like "2.4".
             parts = re.split(r"(?<=[!?])\s+|(?<!\d)\.(?!\d)\s+", message_text)
             sentences = [p.strip() for p in parts if p and p.strip()]

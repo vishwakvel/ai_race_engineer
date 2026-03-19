@@ -62,12 +62,14 @@ export function RadioMessage({
 
   return (
     <div
-      className="border-b border-[var(--dash-border)] pl-5 pr-4 py-4"
+      className="border-b border-[var(--dash-border)] pl-4 pr-3 py-3 last:border-b-0"
       style={{
         borderLeft: isRaceStart
           ? "3px solid var(--ferrari-red)"
           : `3px solid ${borderColor}`,
-        background: isUrgent ? "rgba(255, 87, 34, 0.04)" : "transparent",
+        background: isUrgent
+          ? "rgba(255, 87, 34, 0.06)"
+          : "rgba(0, 0, 0, 0.12)",
       }}
     >
       <div className="flex justify-between items-center mb-1">
@@ -108,12 +110,12 @@ export function RadioMessage({
         </div>
       )}
       <p
-        className="leading-relaxed"
+        className="leading-relaxed m-0"
         style={{
           fontFamily: "var(--font-mono)",
-          fontSize: 13,
+          fontSize: 12,
           color: "var(--dash-text-primary)",
-          lineHeight: 1.6,
+          lineHeight: 1.55,
         }}
       >
         {displayedText || (done ? "(empty)" : "")}

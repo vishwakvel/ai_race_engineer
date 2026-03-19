@@ -12,7 +12,7 @@
 ---
 
 ## Table of Contents
-
+okay
 1. [Architecture](#architecture)
 2. [Machine Learning Stack](#machine-learning-stack)
 3. [How It All Connects](#how-it-all-connects)

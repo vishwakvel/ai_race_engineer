@@ -46,6 +46,11 @@ const CTRL_SELECT: React.CSSProperties = {
 
 const RADIO_CARD_RADIUS = 4;
 
+/** Header h-14 = 56px */
+const HEADER_HEIGHT_PX = 56;
+/** Extra height below viewport so team radio (full grid height) extends further down */
+const TEAM_RADIO_EXTEND_BELOW_VH_PX = 900;
+
 function DashCard({
   title,
   children,
@@ -143,18 +148,13 @@ export function RaceDashboard() {
   const atLapEnd = lapDurFloor > 0 && lapElapsedSeconds >= lapDurFloor;
 
   const chartsBlock = (
-    <div
-      className="flex flex-col gap-4"
-      style={{ minHeight: 0 }}
-    >
+    <div className="flex flex-col gap-4" style={{ minHeight: 0 }}>
       <DashCard title="LAP TIMES">
         <LapTimeChart />
       </DashCard>
-
       <DashCard title="TYRE DEG">
         <TyreDegradationCard />
       </DashCard>
-
       <DashCard title="STRATEGY TIMELINE">
         <StrategyTimeline
           totalLaps={timelineTotal}
@@ -166,31 +166,40 @@ export function RaceDashboard() {
     </div>
   );
 
+  const dashH = `calc(100vh - ${HEADER_HEIGHT_PX}px + ${TEAM_RADIO_EXTEND_BELOW_VH_PX}px)`;
+
   return (
     <div
-      className="flex-1 min-w-0 flex flex-col min-h-0"
-      style={{ borderTop: "1px solid var(--dash-border)" }}
+      className="min-w-0 flex-shrink-0"
+      style={{
+        height: dashH,
+        maxHeight: dashH,
+        overflow: "hidden",
+        borderTop: "1px solid var(--dash-border)",
+        background: "var(--dash-bg)",
+        boxSizing: "border-box",
+      }}
     >
       <div
-        className="p-4 flex-1 min-h-0 flex flex-col"
-        style={{ minHeight: "min(100%, calc(100vh - 120px))" }}
+        className="box-border h-full min-h-0 p-4"
+        style={{ height: "100%", minHeight: 0 }}
       >
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "25% 40% 35%",
-            gridTemplateRows: "auto 1fr",
-            flex: 1,
+            height: "100%",
             minHeight: 0,
-            alignItems: "stretch",
+            gridTemplateColumns: "25% 40% 35%",
+            gridTemplateRows: "minmax(0, 1fr) minmax(0, 1.15fr)",
             gap: 0,
             border: "1px solid var(--dash-border)",
             borderRadius: RADIO_CARD_RADIUS,
             overflow: "hidden",
             background: "var(--dash-surface)",
+            boxSizing: "border-box",
           }}
         >
-          {/* Row 1 col 1: race selection + lap controls */}
+          {/* Col 1 row 1: race + lap controls */}
           <div
             style={{
               gridColumn: 1,
@@ -200,6 +209,8 @@ export function RaceDashboard() {
               gap: 12,
               padding: 16,
               minHeight: 0,
+              overflowY: "auto",
+              overflowX: "hidden",
             }}
           >
             <RaceSelectionCard />
@@ -238,7 +249,6 @@ export function RaceDashboard() {
               }
               openingMessage=""
             />
-
             <div
               className="rounded overflow-hidden"
               style={{
@@ -249,12 +259,7 @@ export function RaceDashboard() {
               }}
             >
               <div style={CARD_HEADER_STYLE}>LAP CONTROLS</div>
-              <div
-                style={{
-                  display: "flex",
-                  gap: 10,
-                }}
-              >
+              <div style={{ display: "flex", gap: 10 }}>
                 <button
                   type="button"
                   onClick={() => void prevLap()}
@@ -264,7 +269,8 @@ export function RaceDashboard() {
                     width: "auto",
                     flex: 1,
                     opacity: canPrev && !isLoading ? 1 : 0.45,
-                    cursor: canPrev && !isLoading ? "pointer" : "not-allowed",
+                    cursor:
+                      canPrev && !isLoading ? "pointer" : "not-allowed",
                   }}
                 >
                   ◀ PREV
@@ -278,13 +284,13 @@ export function RaceDashboard() {
                     width: "auto",
                     flex: 1,
                     opacity: canNext && !isLoading ? 1 : 0.45,
-                    cursor: canNext && !isLoading ? "pointer" : "not-allowed",
+                    cursor:
+                      canNext && !isLoading ? "pointer" : "not-allowed",
                   }}
                 >
                   NEXT ▶
                 </button>
               </div>
-
               <div
                 style={{
                   marginTop: 14,
@@ -296,7 +302,8 @@ export function RaceDashboard() {
                   opacity: raceLoaded ? 1 : 0.5,
                 }}
               >
-                LAP {raceLoaded ? currentLap : "—"} / {raceLoaded ? replayTotal : "—"}
+                LAP {raceLoaded ? currentLap : "—"} /{" "}
+                {raceLoaded ? replayTotal : "—"}
               </div>
               <div
                 style={{
@@ -311,7 +318,6 @@ export function RaceDashboard() {
                 {formatClock(raceLoaded ? lapElapsedSeconds : 0)} /{" "}
                 {formatClock(raceLoaded ? currentLapDuration || 0 : 0)}
               </div>
-
               <button
                 type="button"
                 onClick={toggleAutoPlay}
@@ -322,7 +328,11 @@ export function RaceDashboard() {
                   opacity: canPlayLap ? 1 : 0.4,
                 }}
               >
-                {isPlaying ? "⏸ PAUSE" : atLapEnd ? "▶ REPLAY LAP" : "▶ PLAY LAP"}
+                {isPlaying
+                  ? "⏸ PAUSE"
+                  : atLapEnd
+                    ? "▶ REPLAY LAP"
+                    : "▶ PLAY LAP"}
               </button>
               <select
                 value={playbackSpeed}
@@ -354,7 +364,7 @@ export function RaceDashboard() {
             </div>
           </div>
 
-          {/* Row 1 col 2: circuit map */}
+          {/* Col 2 row 1: circuit map */}
           <div
             style={{
               gridColumn: 2,
@@ -363,17 +373,23 @@ export function RaceDashboard() {
               display: "flex",
               flexDirection: "column",
               alignItems: "stretch",
+              justifyContent: "center",
               padding: 16,
               minHeight: 0,
               minWidth: 0,
+              overflow: "hidden",
             }}
           >
             <div
               style={{
                 width: "100%",
                 minWidth: 0,
+                minHeight: 0,
+                flex: "1 1 auto",
+                maxHeight: "100%",
                 aspectRatio: "1 / 1",
                 maxWidth: "100%",
+                margin: "0 auto",
                 display: "flex",
                 flexDirection: "column",
               }}
@@ -382,9 +398,9 @@ export function RaceDashboard() {
             </div>
           </div>
 
-          {/* Col 3: team radio — spans full height (row 1 + row 2) */}
+          {/* Col 3: team radio — full grid height, internal scroll */}
           <aside
-            className="flex flex-col min-h-0 min-w-0"
+            data-testid="radio-column"
             style={{
               gridColumn: 3,
               gridRow: "1 / -1",
@@ -392,15 +408,27 @@ export function RaceDashboard() {
               display: "flex",
               flexDirection: "column",
               minHeight: 0,
+              minWidth: 0,
               height: "100%",
+              overflow: "hidden",
+              padding: 16,
+              boxSizing: "border-box",
             }}
           >
-            <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+            <div
+              style={{
+                flex: "1 1 0%",
+                minHeight: 0,
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+              }}
+            >
               <EngineerPanel />
             </div>
           </aside>
 
-          {/* Row 2: charts under left + center only */}
+          {/* Row 2: charts under left + center */}
           <div
             style={{
               gridColumn: "1 / 3",

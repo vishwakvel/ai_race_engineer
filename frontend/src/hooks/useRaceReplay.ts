@@ -168,7 +168,7 @@ export function useRaceReplay() {
       };
       try {
         const lapRes = await apiClient.predictNextLap({
-          stint_laps: stintLaps.slice(-10) as Record<string, unknown>[],
+          stint_laps: stintLaps as Record<string, unknown>[],
           current_state: currentState,
         });
         lstmRaw = {
@@ -417,7 +417,7 @@ export function useRaceReplay() {
     recentMessageTypesRef.current = [
       msgType,
       ...recentMessageTypesRef.current,
-    ].slice(0, 8);
+    ];
 
     addMessage({
       id: `lap-${lapNumber}-${Date.now()}`,
@@ -442,13 +442,19 @@ export function useRaceReplay() {
     if (lapLockRef.current) return;
     const store = useRaceStore.getState();
     const { allLaps, currentLap } = store;
-    const maxLap =
-      allLaps.length > 0 ? Math.max(...allLaps.map((l) => l.lapNumber)) : 0;
-    if (currentLap >= maxLap) {
+    if (!allLaps.length) return;
+
+    const sorted = [...allLaps].sort((a, b) => a.lapNumber - b.lapNumber);
+    const idx = sorted.findIndex((l) => l.lapNumber === currentLap);
+    const next =
+      idx >= 0 && idx < sorted.length - 1
+        ? sorted[idx + 1]!.lapNumber
+        : sorted.find((l) => l.lapNumber > currentLap)?.lapNumber ?? null;
+
+    if (next == null) {
       setIsPlaying(false);
       return;
     }
-    const next = currentLap + 1;
     lapLockRef.current = true;
     try {
       setIsPlaying(false);
@@ -460,13 +466,35 @@ export function useRaceReplay() {
     }
   }, [setCurrentLap, processLap, setLapElapsedSeconds]);
 
-  const prevLap = useCallback(() => {
-    const { currentLap } = useRaceStore.getState();
-    if (currentLap <= 1) return;
-    setIsPlaying(false);
-    setLapElapsedSeconds(0);
-    setCurrentLap(currentLap - 1);
-  }, [setCurrentLap, setLapElapsedSeconds]);
+  const prevLap = useCallback(async () => {
+    if (lapLockRef.current) return;
+    const { allLaps, currentLap } = useRaceStore.getState();
+    if (!allLaps.length) return;
+
+    const sorted = [...allLaps].sort((a, b) => a.lapNumber - b.lapNumber);
+    const idx = sorted.findIndex((l) => l.lapNumber === currentLap);
+    const prev =
+      idx > 0
+        ? sorted[idx - 1]!.lapNumber
+        : sorted
+            .filter((l) => l.lapNumber < currentLap)
+            .reduce<number | null>((_, l) => l.lapNumber, null);
+
+    if (prev == null) {
+      setIsPlaying(false);
+      return;
+    }
+
+    lapLockRef.current = true;
+    try {
+      setIsPlaying(false);
+      setLapElapsedSeconds(0);
+      setCurrentLap(prev);
+      await processLap(prev);
+    } finally {
+      lapLockRef.current = false;
+    }
+  }, [setCurrentLap, processLap, setLapElapsedSeconds]);
 
   const toggleAutoPlay = useCallback(() => {
     setIsPlaying((p) => {
@@ -496,8 +524,10 @@ export function useRaceReplay() {
     scDurationRef.current = 0;
     prevScActiveRef.current = false;
     useRaceStore.getState().setLapElapsedSeconds(0);
-    useRaceStore.getState().setCurrentLap(1);
-    void processLap(1);
+    // Backend lap numbering isn't guaranteed to start at 1 (e.g. Monaco starts at 3).
+    const firstLap = Math.min(...laps.map((l) => l.lapNumber));
+    useRaceStore.getState().setCurrentLap(firstLap);
+    void processLap(firstLap);
   }, [raceLoadSeq, processLap]);
 
   useEffect(() => {

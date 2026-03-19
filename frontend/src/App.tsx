@@ -11,7 +11,7 @@ function App() {
   useScrollReveal();
 
   return (
-    <div className="app">
+    <div className="app" style={{ overflow: "visible" }}>
       <Hero />
       <StatsStrip />
       <FeatureSection />
@@ -24,6 +24,7 @@ function App() {
           scrollMarginTop: 0,
           background: "var(--dash-bg)",
           position: "relative",
+          overflow: "visible",
         }}
       >
         <BoxBoxBanner />

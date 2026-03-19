@@ -82,10 +82,7 @@ export const useRaceStore = create<RaceStore>((set) => ({
     })),
   addMessage: (msg) =>
     set((s) => ({
-      messages: [
-        { ...msg, isNew: true },
-        ...s.messages.map((m) => ({ ...m, isNew: false })),
-      ].slice(0, 30),
+      messages: [msg, ...s.messages],
     })),
   setModelOutputs: (lstm, xgb, ppo) =>
     set({ lstmOutput: lstm, xgbOutput: xgb, ppoOutput: ppo }),
