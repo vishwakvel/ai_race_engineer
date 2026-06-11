@@ -34,6 +34,7 @@ class XGBModel:
         self.vsc_ratios: dict = {}
         self.battle_intensity: dict = {}
         self.loaded = False
+        self._shap_explainer = None
 
     def load(self) -> None:
         path = os.path.join(self.models_dir, "xgb_sc_model.pkl")
@@ -59,7 +60,28 @@ class XGBModel:
             with open(bi) as f:
                 self.battle_intensity = json.load(f)
         self.loaded = True
+        self._build_shap_explainer()
         print("[XGBModel] Loaded successfully.")
+
+    def _build_shap_explainer(self) -> None:
+        """Construct the SHAP TreeExplainer once at load time.
+
+        Building TreeExplainer per request dominated /predict/safety_car
+        latency; the explainer is stateless after construction and safe
+        to reuse across requests.
+        """
+        try:
+            import shap
+
+            base_estimator = (
+                self.model.calibrated_classifiers_[0].estimator
+                if hasattr(self.model, "calibrated_classifiers_")
+                else self.model
+            )
+            self._shap_explainer = shap.TreeExplainer(base_estimator)
+        except Exception as e:
+            print(f"[XGBModel] SHAP explainer unavailable: {e}")
+            self._shap_explainer = None
 
     def predict(self, state: dict) -> dict:
         circuit_id = str(state.get("circuit_id", "") or "").lower()
@@ -84,15 +106,9 @@ class XGBModel:
             sc_probability = p_xgb
         top_shap_factors = []
         try:
-            import shap
-
-            base_estimator = (
-                self.model.calibrated_classifiers_[0].estimator
-                if hasattr(self.model, "calibrated_classifiers_")
-                else self.model
-            )
-            explainer = shap.TreeExplainer(base_estimator)
-            shap_vals = explainer.shap_values(X)
+            if self._shap_explainer is None:
+                raise RuntimeError("SHAP explainer not available")
+            shap_vals = self._shap_explainer.shap_values(X)
             if isinstance(shap_vals, list):
                 shap_vals = shap_vals[1] if len(shap_vals) > 1 else shap_vals[0]
             if shap_vals is not None and len(shap_vals) > 0:

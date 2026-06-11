@@ -45,6 +45,31 @@ CIRCUIT_ENCODING = {
 
 COMPOUND_HARDNESS = {0: 0, 1: 1, 2: 2, 3: 1.5, 4: 1}
 
+# Module-level cache: circuit_battle_intensity.json is static per process and
+# was previously re-read from disk on every build_xgb_features call — a hot
+# path during Monte Carlo simulation (every simulated lap).
+_BATTLE_INTENSITY_CACHE: dict | None = None
+
+
+def _battle_intensity() -> dict:
+    global _BATTLE_INTENSITY_CACHE
+    if _BATTLE_INTENSITY_CACHE is None:
+        path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "data",
+            "models",
+            "circuit_battle_intensity.json",
+        )
+        data: dict = {}
+        if os.path.exists(path):
+            try:
+                with open(path) as f:
+                    data = json.load(f)
+            except Exception:
+                data = {}
+        _BATTLE_INTENSITY_CACHE = data
+    return _BATTLE_INTENSITY_CACHE
+
 
 def stint_laps_circuit_lap_time_zscore(
     stint_laps: list[dict], circuit_lt_mean: float, circuit_lt_std: float
@@ -153,15 +178,8 @@ class FeatureBuilder:
         circuit_encoded = float(circuit_encoded)
 
         cid = str(state.get("circuit_id", "")).lower()
-        battle = 2.2
-        md = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "models", "circuit_battle_intensity.json")
-        if os.path.exists(md):
-            try:
-                with open(md) as f:
-                    bd = json.load(f)
-                battle = float(bd.get(cid, bd.get(state.get("circuit_id", ""), 2.2)))
-            except Exception:
-                pass
+        bd = _battle_intensity()
+        battle = float(bd.get(cid, bd.get(state.get("circuit_id", ""), 2.2)))
 
         fts = state.get("field_tyre_stress_index")
         if fts is None:

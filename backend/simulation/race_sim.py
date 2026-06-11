@@ -20,6 +20,25 @@ def _load_json(path: str, default: dict) -> dict:
     return default
 
 
+# xgb_feature_names.json is static per process; previously re-read from disk
+# on every simulated lap of every Monte Carlo run.
+_FEATURE_NAMES_CACHE: dict[str, list | None] = {}
+
+
+def _xgb_feature_names(models_dir: str) -> list | None:
+    if models_dir not in _FEATURE_NAMES_CACHE:
+        fn_path = os.path.join(models_dir, "xgb_feature_names.json")
+        names = None
+        if os.path.exists(fn_path):
+            try:
+                with open(fn_path) as f:
+                    names = json.load(f)
+            except Exception:
+                names = None
+        _FEATURE_NAMES_CACHE[models_dir] = names
+    return _FEATURE_NAMES_CACHE[models_dir]
+
+
 def _simulate_lap_time_impl(
     lstm_model,
     feature_builder,
@@ -59,11 +78,9 @@ def _predict_sc_impl(xgb_model, feature_builder, state, models_dir, rng=None):
         return 0.05
     feats = feature_builder.build_xgb_features(state)
     feats["historical_sc_rate"] = state.get("historical_sc_rate", 0.15)
-    fn_path = os.path.join(models_dir, "xgb_feature_names.json")
-    if not os.path.exists(fn_path):
+    names = _xgb_feature_names(models_dir)
+    if names is None:
         return 0.05
-    with open(fn_path) as f:
-        names = json.load(f)
     X = np.array([[feats.get(n, 0) for n in names]], dtype=np.float32)
     proba = xgb_model.predict_proba(X)[0, 1]
     return float(proba)
