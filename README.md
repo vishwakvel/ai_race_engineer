@@ -664,15 +664,31 @@ kill $(lsof -ti :8000) && uvicorn backend.main:app --reload --port 8000
 
 ## Docker
 
+### Development
+
 ```bash
 docker compose up --build
 ```
 
 This starts both services:
 - **Backend** on port **8000** — mounts `./backend/data` → `/app/data`
-- **Frontend** on port **5173** — depends on backend service
+- **Frontend** on port **5173** — Vite dev server, depends on backend
 
-For production deployment, set `ANTHROPIC_API_KEY` in a `.env` file at the repo root before running compose.
+Set `ANTHROPIC_API_KEY` in `backend/.env` for live engineer radio messages.
+
+### Production
+
+```bash
+docker compose -f docker-compose.prod.yml up --build
+```
+
+This builds and serves:
+- **Backend** on port **8000** — same data/model volume mounts as dev
+- **Frontend** on port **8080** — nginx serving the static Vite build
+
+The production frontend is built with `VITE_API_BASE_URL=http://localhost:8000` (see `docker-compose.prod.yml`). Change the build arg if the API is hosted elsewhere.
+
+Deep links such as `/race/2024/8?lap=33` work in production — nginx falls back to `index.html` for client-side routing.
 
 ---
 
