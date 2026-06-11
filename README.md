@@ -690,6 +690,20 @@ The production frontend is built with `VITE_API_BASE_URL=http://localhost:8000` 
 
 Deep links such as `/race/2024/8?lap=33` work in production — nginx falls back to `index.html` for client-side routing.
 
+### Render (backend API)
+
+Deploy the FastAPI backend as a **Web Service → Docker** from this repo:
+
+1. Connect the GitHub repo on [Render](https://render.com).
+2. Use **Blueprint** with `render.yaml`, or create a Web Service manually:
+   - **Root directory:** repo root
+   - **Dockerfile path:** `backend/Dockerfile`
+   - **Health check path:** `/health`
+3. Set **`ANTHROPIC_API_KEY`** in the Render dashboard (required for live engineer radio).
+4. Copy the service URL (e.g. `https://leclercai-api.onrender.com`) into Vercel as **`VITE_API_BASE_URL`**, then redeploy the frontend.
+
+The container listens on Render’s injected **`PORT`** (defaults to `8000` locally). Models and lap data are baked into the image via `COPY backend/`.
+
 ---
 
 ## Message Types Reference

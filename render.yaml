@@ -1,0 +1,19 @@
+# Render Blueprint — backend API (Docker)
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: leclercai-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: PYTHONPATH
+        value: /app
+      - key: DATA_DIR
+        value: /app/backend/data/processed
+      - key: MODEL_DIR
+        value: /app/backend/data/models
