@@ -1,11 +1,4 @@
-const COMPOUND_COLORS: Record<string, string> = {
-  SOFT: "#E8334A",
-  MEDIUM: "#F5C518",
-  HARD: "#D8D8D8",
-  INTERMEDIATE: "#39C473",
-  WET: "#4A9FE0",
-  UNKNOWN: "#555577",
-};
+import { COMPOUND_COLORS } from "@/design/tokens";
 
 export interface StintSegment {
   startLap: number;
@@ -18,21 +11,25 @@ interface StrategyTimelineProps {
   totalLaps: number;
   currentLap: number;
   stints: StintSegment[];
+  /** Narrow sidebar layout — shorter bar, smaller labels. */
+  compact?: boolean;
 }
 
 export function StrategyTimeline({
   totalLaps,
   currentLap,
   stints,
+  compact = false,
 }: StrategyTimelineProps) {
   const total = totalLaps || 52;
+  const barH = compact ? 22 : 32;
 
   if (stints.length === 0) {
     return (
       <div>
         <div
           className="flex w-full rounded-sm overflow-hidden mb-2"
-          style={{ height: 32, background: "var(--dash-elevated)" }}
+          style={{ height: barH, background: "var(--dash-elevated)" }}
         >
           <div className="flex-1 opacity-60" style={{ background: "var(--dash-border)" }} />
           <div className="flex-1 opacity-80" style={{ background: "var(--dash-border)" }} />
@@ -41,7 +38,7 @@ export function StrategyTimeline({
         <div
           style={{
             fontFamily: "var(--font-mono)",
-            fontSize: 12,
+            fontSize: compact ? 10 : 12,
             color: "var(--dash-text-secondary)",
           }}
         >
@@ -57,10 +54,10 @@ export function StrategyTimeline({
         style={{
           position: "relative",
           width: "100%",
-          height: 32,
+          height: barH,
           background: "var(--dash-elevated)",
           borderRadius: 2,
-          marginBottom: 8,
+          marginBottom: compact ? 4 : 8,
         }}
       >
         {stints.map((stint) => {
@@ -97,23 +94,25 @@ export function StrategyTimeline({
             background: "white",
           }}
         >
-          <span
-            className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: 9,
-              color: "var(--dash-text-muted)",
-              letterSpacing: "0.1em",
-            }}
-          >
-            NOW
-          </span>
+          {!compact && (
+            <span
+              className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: 9,
+                color: "var(--dash-text-muted)",
+                letterSpacing: "0.1em",
+              }}
+            >
+              NOW
+            </span>
+          )}
         </div>
       </div>
       <div
         style={{
           fontFamily: "var(--font-mono)",
-          fontSize: 12,
+          fontSize: compact ? 10 : 12,
           color: "var(--dash-text-secondary)",
         }}
       >

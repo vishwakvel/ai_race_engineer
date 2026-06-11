@@ -97,7 +97,15 @@ export function EngineerPanel() {
         </div>
       </div>
 
-      <div ref={feedRef} className="radio-feed" style={FEED}>
+      <div
+        ref={feedRef}
+        className="radio-feed"
+        style={FEED}
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions"
+        aria-label="Team radio messages"
+      >
         {messages.length === 0 ? (
           <div
             style={{

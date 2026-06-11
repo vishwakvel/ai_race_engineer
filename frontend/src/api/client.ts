@@ -230,20 +230,67 @@ export async function getEngineerMessage(body: {
   return res.data;
 }
 
+export interface EngineerMessageApiResponse {
+  message: string;
+  urgency: string;
+  message_type?: string;
+  lap_number?: number;
+  fallback?: boolean;
+}
+
+export interface LapTickApiResponse {
+  next_lap: NextLapApiResponse;
+  safety_car: SafetyCarApiResponse;
+  strategy: StrategyRecommendApiResponse;
+  engineer: EngineerMessageApiResponse;
+}
+
+/** POST /race/lap_tick — full per-lap pipeline in one round trip. */
+export async function lapTick(
+  body: Record<string, unknown>
+): Promise<LapTickApiResponse> {
+  const res = await client.post<LapTickApiResponse>("/race/lap_tick", body);
+  return res.data;
+}
+
+interface RawStrategyOption {
+  compounds?: string[];
+  stint_lengths?: number[];
+  expected_position?: number;
+  rationale?: string;
+}
+
+function mapStrategyOption(raw: RawStrategyOption | undefined): StrategyOption {
+  return {
+    compounds: raw?.compounds ?? [],
+    stintLengths: raw?.stint_lengths ?? [],
+    expectedPosition: raw?.expected_position ?? 0,
+    rationale: raw?.rationale ?? "",
+  };
+}
+
+export interface PreraceStrategy {
+  openingMessage: string;
+  recommended: StrategyOption;
+  alternative1: StrategyOption;
+  alternative2: StrategyOption;
+}
+
 /** GET /engineer/prerace_strategy */
-export function getPreraceStrategy(params: {
+export async function getPreraceStrategy(params: {
   circuit: string;
   year: number;
-  tyre_allocation: string;
-}): Promise<{
-  recommended: StrategyOption;
-  alternative_1: StrategyOption;
-  alternative_2: StrategyOption;
-  opening_message: string;
-}> {
-  return client
-    .get("/engineer/prerace_strategy", { params })
-    .then((res) => res.data);
+  total_laps: number;
+  tyre_allocation?: string;
+}): Promise<PreraceStrategy> {
+  const res = await client.get("/engineer/prerace_strategy", { params });
+  const d = res.data ?? {};
+  return {
+    openingMessage: String(d.opening_message ?? ""),
+    recommended: mapStrategyOption(d.recommended),
+    alternative1: mapStrategyOption(d.alternative_1),
+    alternative2: mapStrategyOption(d.alternative_2),
+  };
 }
 
 export const apiClient = {
@@ -255,4 +302,5 @@ export const apiClient = {
   recommendStrategy,
   getEngineerMessage,
   getPreraceStrategy,
+  lapTick,
 };

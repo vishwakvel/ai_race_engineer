@@ -6,6 +6,7 @@ import type {
   LstmOutput,
   XgbOutput,
   PpoOutput,
+  StrategyOption,
 } from "@/types";
 
 interface RaceStore {
@@ -22,12 +23,18 @@ interface RaceStore {
   ppoOutput: PpoOutput | null;
   messages: RadioMessage[];
   preRaceModalOpen: boolean;
+  /** Transient connection/data error surfaced in the status banner. */
+  statusError: string | null;
+  /** Strategy chosen from the pre-race brief via SET AS PLAN. */
+  plannedStrategy: StrategyOption | null;
   /** Incremented each LOAD RACE — replay hook bootstraps lap 1 */
   raceLoadSeq: number;
   lastReplayBootstrapSeq: number;
   /** Simulated seconds into the current lap (for map + intra-lap play). */
   lapElapsedSeconds: number;
 
+  setStatusError: (msg: string | null) => void;
+  setPlannedStrategy: (plan: StrategyOption | null) => void;
   setSelectedRace: (race: SelectedRace | null) => void;
   setAllLaps: (laps: LapData[]) => void;
   setCurrentLap: (lap: number) => void;
@@ -64,11 +71,15 @@ export const useRaceStore = create<RaceStore>((set) => ({
   ppoOutput: null,
   messages: [],
   preRaceModalOpen: false,
+  statusError: null,
+  plannedStrategy: null,
   raceLoadSeq: 0,
   lastReplayBootstrapSeq: 0,
   pitEvents: [],
   lapElapsedSeconds: 0,
 
+  setStatusError: (msg) => set({ statusError: msg }),
+  setPlannedStrategy: (plan) => set({ plannedStrategy: plan }),
   setSelectedRace: (race) => set({ selectedRace: race }),
   setAllLaps: (laps) => set({ allLaps: laps }),
   setCurrentLap: (lap) => set({ currentLap: lap }),
@@ -113,6 +124,7 @@ export const useRaceStore = create<RaceStore>((set) => ({
       messages: [],
       pitEvents: [],
       lapElapsedSeconds: 0,
+      plannedStrategy: null,
     }),
   addPitEvent: (event) =>
     set((s) => ({ pitEvents: [...s.pitEvents, event] })),

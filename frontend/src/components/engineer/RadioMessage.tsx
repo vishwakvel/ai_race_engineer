@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useMotionSafe } from "@/hooks/useMotionSafe";
 
 interface RadioMessageProps {
   message: string;
@@ -25,6 +26,7 @@ export function RadioMessage({
   lapNumber,
   isNew,
 }: RadioMessageProps) {
+  const motionOk = useMotionSafe();
   const [displayedText, setDisplayedText] = useState(isNew ? "" : message);
   const [done, setDone] = useState(!isNew);
   const indexRef = useRef(0);
@@ -32,6 +34,11 @@ export function RadioMessage({
 
   useEffect(() => {
     if (!isNew || !message) {
+      setDisplayedText(message);
+      setDone(true);
+      return;
+    }
+    if (!motionOk) {
       setDisplayedText(message);
       setDone(true);
       return;
@@ -53,7 +60,7 @@ export function RadioMessage({
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [message, isNew]);
+  }, [message, isNew, motionOk]);
 
   const borderColor = BORDER_COLORS[urgency];
   const labelColor = LABEL_COLORS[urgency];
@@ -118,12 +125,15 @@ export function RadioMessage({
           lineHeight: 1.55,
         }}
       >
-        {displayedText || (done ? "(empty)" : "")}
-        {!done && (
-          <span className="cursor-blink" style={{ opacity: 1 }}>
+        <span aria-hidden={motionOk && !done}>{displayedText || (done ? "(empty)" : "")}</span>
+        {!done && motionOk && (
+          <span className="cursor-blink" aria-hidden>
             |
           </span>
         )}
+        <span className="sr-only">
+          {urgency}: {message}
+        </span>
       </p>
     </div>
   );

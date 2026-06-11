@@ -1,13 +1,10 @@
 import { useState, useEffect, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import type { StrategyOption } from "@/types";
-
-const COMPOUND_COLORS: Record<string, string> = {
-  SOFT: "var(--tyre-soft)",
-  MEDIUM: "var(--tyre-medium)",
-  HARD: "var(--tyre-hard)",
-  INTERMEDIATE: "var(--tyre-inter)",
-  WET: "var(--tyre-wet)",
-};
+import { COMPOUND_COLORS } from "@/design/tokens";
+import { MOTION } from "@/design/motion";
+import { useMotionSafe } from "@/hooks/useMotionSafe";
+import { useRaceStore } from "@/store/raceStore";
 
 interface PreRaceModalProps {
   isOpen: boolean;
@@ -16,14 +13,20 @@ interface PreRaceModalProps {
   alternative1: StrategyOption;
   alternative2: StrategyOption;
   openingMessage: string;
+  isLoading?: boolean;
 }
 
 function TypewriterText({ text }: { text: string }) {
+  const motionOk = useMotionSafe();
   const [displayed, setDisplayed] = useState("");
   const iRef = useRef(0);
 
   useEffect(() => {
     if (!text) return;
+    if (!motionOk) {
+      setDisplayed(text);
+      return;
+    }
     setDisplayed("");
     iRef.current = 0;
     const id = setInterval(() => {
@@ -36,14 +39,17 @@ function TypewriterText({ text }: { text: string }) {
       setDisplayed(text.slice(0, iRef.current));
     }, 25);
     return () => clearInterval(id);
-  }, [text]);
+  }, [text, motionOk]);
 
   return (
     <span>
-      {displayed}
-      {displayed.length < text.length && (
-        <span className="cursor-blink">|</span>
+      <span aria-hidden={motionOk}>{displayed}</span>
+      {motionOk && displayed.length < text.length && (
+        <span className="cursor-blink" aria-hidden>
+          |
+        </span>
       )}
+      <span className="sr-only">{text}</span>
     </span>
   );
 }
@@ -55,87 +61,113 @@ export function PreRaceModal({
   alternative1,
   alternative2,
   openingMessage,
+  isLoading,
 }: PreRaceModalProps) {
-  if (!isOpen) return null;
+  const panelRef = useRef<HTMLDivElement>(null);
+  const motionOk = useMotionSafe();
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    panelRef.current?.focus();
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{
-        background: "rgba(0, 0, 0, 0.85)",
-        backdropFilter: "blur(4px)",
-      }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div
-        className="max-w-[900px] w-full rounded overflow-hidden max-h-[80vh] overflow-y-auto"
-        style={{
-          background: "var(--dash-surface)",
-          border: "1px solid var(--dash-border-bright)",
-          borderTop: "3px solid var(--ferrari-red)",
-          borderRadius: 4,
-          padding: 40,
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex justify-between items-center mb-6">
-          <h2
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 700,
-              fontSize: 20,
-              letterSpacing: "0.1em",
-              color: "var(--dash-text-primary)",
-              textTransform: "uppercase",
-            }}
-          >
-            PRE-RACE STRATEGY BRIEF
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: 12,
-              color: "var(--dash-text-secondary)",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            Close
-          </button>
-        </div>
-
-        <div
-          className="mb-8 font-mono text-sm leading-relaxed"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{
-            fontFamily: "var(--font-mono)",
-            color: "var(--dash-text-secondary)",
+            background: "rgba(0, 0, 0, 0.85)",
+            backdropFilter: "blur(4px)",
           }}
+          initial={motionOk ? { opacity: 0 } : false}
+          animate={{ opacity: 1 }}
+          exit={motionOk ? { opacity: 0 } : undefined}
+          transition={{ duration: MOTION.fast }}
+          onClick={(e) => e.target === e.currentTarget && onClose()}
+          role="presentation"
         >
-          {openingMessage ? (
-            <TypewriterText text={openingMessage} />
-          ) : (
-            "Opening message placeholder"
-          )}
-        </div>
+          <motion.div
+            ref={panelRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="prerace-title"
+            className="max-w-[900px] w-full rounded overflow-hidden max-h-[80vh] overflow-y-auto outline-none"
+            initial={motionOk ? { y: 16, opacity: 0 } : false}
+            animate={{ y: 0, opacity: 1 }}
+            exit={motionOk ? { y: 8, opacity: 0 } : undefined}
+            transition={{ duration: MOTION.base, ease: MOTION.easeStandard }}
+            style={{
+              background: "var(--dash-surface)",
+              border: "1px solid var(--dash-border-bright)",
+              borderTop: "3px solid var(--ferrari-red)",
+              borderRadius: 4,
+              padding: 40,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2
+                id="prerace-title"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 700,
+                  fontSize: 20,
+                  letterSpacing: "0.1em",
+                  color: "var(--dash-text-primary)",
+                  textTransform: "uppercase",
+                }}
+              >
+                PRE-RACE STRATEGY BRIEF
+              </h2>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close pre-race brief"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: 12,
+                  color: "var(--dash-text-secondary)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+            </div>
 
-        <div
-          className="grid gap-4"
-          style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
-        >
-          <StrategyColumn
-            label="RECOMMENDED"
-            option={recommended}
-            accentBorder
-            showSetButton
-          />
-          <StrategyColumn label="ALTERNATIVE" option={alternative1} />
-          <StrategyColumn label="ALTERNATIVE" option={alternative2} />
-        </div>
-      </div>
-    </div>
+            <div
+              className="mb-8 font-mono text-sm leading-relaxed"
+              style={{
+                fontFamily: "var(--font-mono)",
+                color: "var(--dash-text-secondary)",
+              }}
+            >
+              {isLoading ? (
+                "Computing strategy options…"
+              ) : openingMessage ? (
+                <TypewriterText text={openingMessage} />
+              ) : (
+                "Load a race to generate the strategy brief."
+              )}
+            </div>
+
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+              <StrategyColumn label="RECOMMENDED" option={recommended} accentBorder />
+              <StrategyColumn label="ALTERNATIVE" option={alternative1} />
+              <StrategyColumn label="ALTERNATIVE" option={alternative2} />
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -143,13 +175,19 @@ function StrategyColumn({
   label,
   option,
   accentBorder,
-  showSetButton,
 }: {
   label: string;
   option: StrategyOption;
   accentBorder?: boolean;
-  showSetButton?: boolean;
 }) {
+  const plannedStrategy = useRaceStore((s) => s.plannedStrategy);
+  const setPlannedStrategy = useRaceStore((s) => s.setPlannedStrategy);
+  const hasData = option.compounds.length > 0 && option.compounds[0] !== "—";
+  const isPlanned =
+    plannedStrategy != null &&
+    plannedStrategy.compounds.join() === option.compounds.join() &&
+    plannedStrategy.stintLengths.join() === option.stintLengths.join();
+
   return (
     <div
       className="rounded p-4"
@@ -164,7 +202,7 @@ function StrategyColumn({
         className="mb-3 uppercase tracking-wider"
         style={{
           fontFamily: "var(--font-display)",
-          fontSize: 10,
+          fontSize: 11,
           color: "var(--dash-text-secondary)",
         }}
       >
@@ -176,15 +214,19 @@ function StrategyColumn({
             <span
               className="inline-block w-5 h-5 rounded-full shrink-0"
               style={{ background: COMPOUND_COLORS[c] ?? "var(--dash-border)" }}
+              aria-hidden
             />
+            <span className="sr-only">{c}</span>
             {j < option.compounds.length - 1 && (
-              <span style={{ color: "var(--dash-text-muted)", fontSize: 12 }}>→</span>
+              <span style={{ color: "var(--dash-text-muted)", fontSize: 12 }} aria-hidden>
+                →
+              </span>
             )}
           </span>
         ))}
       </div>
       <div
-        className="mb-1 uppercase text-[10px] tracking-wider"
+        className="mb-1 uppercase text-[11px] tracking-wider"
         style={{ color: "var(--dash-text-muted)", fontFamily: "var(--font-display)" }}
       >
         STINT LENGTHS
@@ -196,7 +238,7 @@ function StrategyColumn({
         {option.stintLengths.join(" · ")} LAPS
       </div>
       <div
-        className="mb-1 uppercase text-[10px] tracking-wider"
+        className="mb-1 uppercase text-[11px] tracking-wider"
         style={{ color: "var(--dash-text-muted)", fontFamily: "var(--font-display)" }}
       >
         EXPECTED POSITION
@@ -218,25 +260,20 @@ function StrategyColumn({
       >
         {option.rationale}
       </p>
-      {showSetButton && (
-        <button
-          type="button"
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: 11,
-            textTransform: "uppercase",
-            letterSpacing: "0.1em",
-            padding: "6px 12px",
-            borderRadius: 2,
-            background: "var(--dash-border-bright)",
-            color: "var(--dash-text-secondary)",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          SET AS PLAN
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={() => setPlannedStrategy(isPlanned ? null : option)}
+        disabled={!hasData}
+        className="font-display text-[11px] uppercase tracking-[0.1em] px-3 py-1.5 rounded-sm border-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 transition-colors duration-150"
+        style={{
+          background: isPlanned
+            ? "var(--status-gain)"
+            : "var(--dash-border-bright)",
+          color: isPlanned ? "#0a0a0a" : "var(--dash-text-secondary)",
+        }}
+      >
+        {isPlanned ? "✓ PLAN SET" : "SET AS PLAN"}
+      </button>
     </div>
   );
 }

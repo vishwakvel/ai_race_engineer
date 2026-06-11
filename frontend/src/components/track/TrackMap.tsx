@@ -1,6 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useSyncExternalStore } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRaceStore } from "@/store/raceStore";
-import { apiClient, type TrackMapData } from "@/api/client";
+import { trackMapQuery } from "@/api/queries";
+import { playbackClock } from "@/replay/playbackClock";
+import { COMPOUND_COLORS, FERRARI_RED } from "@/design/tokens";
 
 const CIRCUIT_NAMES: Record<string, string> = {
   sakhir: "Bahrain",
@@ -22,14 +25,6 @@ const CIRCUIT_NAMES: Record<string, string> = {
   austin: "Austin",
   mexico_city: "Mexico City",
   las_vegas: "Las Vegas",
-};
-
-const COMPOUND_COLORS: Record<string, string> = {
-  SOFT: "#E8334A",
-  MEDIUM: "#F5C518",
-  HARD: "#D8D8D8",
-  INTERMEDIATE: "#39C473",
-  WET: "#4A9FE0",
 };
 
 const FALLBACK_PATH =
@@ -102,6 +97,72 @@ type TrackMapProps = {
   compactSquare?: boolean;
 };
 
+/**
+ * Car marker + trail, isolated so frame-rate updates from the playback
+ * clock re-render only this subtree (not the whole map / dashboard).
+ */
+function SmoothCar({
+  pts,
+  arc,
+  lapDur,
+  carColor,
+}: {
+  pts: [number, number][];
+  arc: number[];
+  lapDur: number;
+  carColor: string;
+}) {
+  // Frame-rate fractional seconds while the clock runs; store value otherwise.
+  const clockElapsed = useSyncExternalStore(
+    playbackClock.subscribe,
+    playbackClock.getElapsed
+  );
+  const storeElapsed = useRaceStore((s) => s.lapElapsedSeconds);
+  const elapsed = playbackClock.running ? clockElapsed : storeElapsed;
+
+  const progress01 = lapDur > 0 ? Math.max(0, Math.min(1, elapsed / lapDur)) : 0;
+  const totalLen = arc[arc.length - 1] ?? 0;
+  const dist = progress01 * totalLen;
+  const carPos = pointAtDistance(pts, arc, dist);
+  if (!carPos) return null;
+
+  // Trail: sampled at fixed arc distances behind the car — pure derivation.
+  const spacing = totalLen / 220;
+  const opacities = [0.6, 0.55, 0.5, 0.4, 0.28, 0.18, 0.1, 0.06];
+  const trail = opacities
+    .map((o, i) => {
+      const d = dist - (i + 1) * spacing;
+      if (d < 0) return null;
+      const p = pointAtDistance(pts, arc, d);
+      return p ? { ...p, o } : null;
+    })
+    .filter((p): p is { x: number; y: number; o: number } => p != null);
+
+  return (
+    <>
+      {trail.map((pos, i) => (
+        <circle
+          key={i}
+          cx={pos.x}
+          cy={pos.y}
+          r={2.5}
+          fill={carColor}
+          opacity={pos.o}
+        />
+      ))}
+      <circle
+        cx={carPos.x}
+        cy={carPos.y}
+        r={6}
+        fill={carColor}
+        stroke="white"
+        strokeWidth={1.5}
+      />
+      <circle cx={carPos.x} cy={carPos.y} r={10} fill={carColor} opacity={0.2} />
+    </>
+  );
+}
+
 export function TrackMap({
   embedded = false,
   compactSquare = false,
@@ -111,14 +172,13 @@ export function TrackMap({
   const totalLapsStore = useRaceStore((s) => s.totalLaps);
   const lapElapsedSeconds = useRaceStore((s) => s.lapElapsedSeconds);
 
-  const [trailPositions, setTrailPositions] = useState<{ x: number; y: number }[]>(
-    []
-  );
-  const [trackData, setTrackData] = useState<TrackMapData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-
   const circuitId = allLaps[0]?.circuitId ? String(allLaps[0].circuitId) : "";
+
+  const {
+    data: trackData = null,
+    isFetching: loading,
+    isError: error,
+  } = useQuery({ ...trackMapQuery(circuitId), enabled: circuitId !== "" });
 
   const circuitName =
     CIRCUIT_NAMES[circuitId.toLowerCase().replace(/-/g, "_")] ??
@@ -138,14 +198,15 @@ export function TrackMap({
 
   const currentLapData = allLaps.find((l) => l.lapNumber === currentLap);
   const compound = currentLapData?.compoundStr ?? "MEDIUM";
-  const carColor = COMPOUND_COLORS[compound] ?? "#E4032E";
+  const scActive = currentLapData?.safetyCarActive ?? false;
+  const carColor = COMPOUND_COLORS[compound] ?? FERRARI_RED;
   const lapDur =
     currentLapData &&
     currentLapData.lapTimeSeconds > 20 &&
     currentLapData.lapTimeSeconds < 400
       ? currentLapData.lapTimeSeconds
       : 92;
-  const lapProgress01 = lapDur > 0 ? lapElapsedSeconds / lapDur : 0;
+  const lapProgress01 = lapDur > 0 ? Math.min(lapElapsedSeconds, lapDur) / lapDur : 0;
 
   const pts = useMemo(
     () => (trackData?.points as [number, number][]) ?? [],
@@ -154,47 +215,15 @@ export function TrackMap({
 
   const arc = useMemo(() => (pts.length >= 2 ? buildArcLengths(pts) : []), [pts]);
 
-  const carPos = useMemo(() => {
-    if (pts.length < 2 || currentLap < 0) return null;
-    const totalLen = arc[arc.length - 1] ?? 0;
-    const d = Math.max(0, Math.min(1, lapProgress01)) * totalLen;
-    return pointAtDistance(pts, arc, d);
-  }, [pts, arc, currentLap, lapProgress01]);
-
-  useEffect(() => {
-    setTrailPositions([]);
-  }, [currentLap]);
-
-  useEffect(() => {
-    if (carPos) {
-      setTrailPositions((prev) => [...prev.slice(-12), carPos]);
-    }
-  }, [carPos?.x, carPos?.y]);
-
-  useEffect(() => {
-    if (!circuitId || circuitId === "") {
-      setTrackData(null);
-      setError(false);
-      setLoading(false);
-      setTrailPositions([]);
-      return;
-    }
-    setLoading(true);
-    setError(false);
-    setTrackData(null);
-    setTrailPositions([]);
-
-    apiClient
-      .getTrackMap(circuitId)
-      .then((data) => {
-        setTrackData(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError(true);
-        setLoading(false);
-      });
-  }, [circuitId]);
+  const drsCount = trackData?.drs_zones_count ?? 0;
+  const drsMarkers = useMemo(() => {
+    if (drsCount <= 0 || pts.length < 2 || !arc.length) return [];
+    const total = arc[arc.length - 1] ?? 0;
+    return Array.from({ length: drsCount }, (_, i) => {
+      const frac = (i + 1) / (drsCount + 1);
+      return pointAtDistance(pts, arc, total * frac);
+    }).filter((p): p is { x: number; y: number } => p != null);
+  }, [drsCount, pts, arc]);
 
   const completedPoints =
     pts.length >= 2 && currentLap >= 0 && lapProgress01 > 0
@@ -212,11 +241,12 @@ export function TrackMap({
           background: "var(--dash-surface)",
           border: compactSquare ? "1px solid var(--dash-border)" : "none",
           borderRadius: compactSquare ? 4 : 0,
-          padding: compactSquare ? "12px 16px" : "16px 20px",
+          padding: compactSquare ? "6px 8px" : "16px 20px",
           height: "100%",
           width: "100%",
           display: "flex" as const,
           flexDirection: "column" as const,
+          flex: "1 1 auto",
           minHeight: 0,
           minWidth: 0,
           boxSizing: "border-box" as const,
@@ -275,8 +305,8 @@ export function TrackMap({
           letterSpacing: "0.2em",
           color: "var(--dash-text-secondary)",
           borderBottom: "1px solid var(--dash-border)",
-          paddingBottom: compactSquare ? 8 : 12,
-          marginBottom: compactSquare ? 8 : 16,
+          paddingBottom: compactSquare ? 6 : 12,
+          marginBottom: compactSquare ? 4 : 16,
         }}
       >
         {circuitName.toUpperCase()}
@@ -309,21 +339,36 @@ export function TrackMap({
       <div
         className={
           compactSquare || embedded
-            ? "flex-1 min-h-0 flex items-center justify-center"
+            ? "flex-1 min-h-0 w-full"
             : ""
         }
         style={{ minWidth: 0, width: "100%" }}
       >
         <svg
           width="100%"
+          height={compactSquare || embedded ? "100%" : undefined}
           viewBox={viewBox}
           preserveAspectRatio="xMidYMid meet"
+          role="img"
+          aria-label={`${circuitName} circuit map${scActive ? ", safety car period" : ""}, lap ${currentLap}`}
           style={{
             display: "block",
-            maxHeight: compactSquare ? "100%" : embedded ? "100%" : 280,
             width: "100%",
+            height: compactSquare || embedded ? "100%" : undefined,
+            maxHeight: compactSquare || embedded ? undefined : 280,
           }}
         >
+          {scActive && (
+            <path
+              d={path}
+              fill="none"
+              stroke="var(--timing-yellow)"
+              strokeWidth={12}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity={0.22}
+            />
+          )}
           <path
             d={path}
             fill="none"
@@ -368,38 +413,21 @@ export function TrackMap({
               strokeWidth={2}
             />
           )}
-          {trailPositions.map((pos, i) => {
-            const opacities = [0.06, 0.1, 0.18, 0.28, 0.4, 0.5, 0.55, 0.6];
-            const o = opacities[trailPositions.length - 1 - i] ?? 0.05;
-            return (
-              <circle
-                key={`${pos.x}-${pos.y}-${i}`}
-                cx={pos.x}
-                cy={pos.y}
-                r={2.5}
-                fill={carColor}
-                opacity={o}
+          {drsMarkers.map((m, i) => (
+            <g key={`drs-${i}`}>
+              <rect
+                x={m.x - 5}
+                y={m.y - 2}
+                width={10}
+                height={4}
+                fill="var(--timing-green)"
+                opacity={0.85}
+                rx={1}
               />
-            );
-          })}
-          {carPos && (
-            <>
-              <circle
-                cx={carPos.x}
-                cy={carPos.y}
-                r={6}
-                fill={carColor}
-                stroke="white"
-                strokeWidth={1.5}
-              />
-              <circle
-                cx={carPos.x}
-                cy={carPos.y}
-                r={10}
-                fill={carColor}
-                opacity={0.2}
-              />
-            </>
+            </g>
+          ))}
+          {pts.length >= 2 && currentLap >= 0 && (
+            <SmoothCar pts={pts} arc={arc} lapDur={lapDur} carColor={carColor} />
           )}
         </svg>
       </div>
@@ -410,7 +438,7 @@ export function TrackMap({
           alignItems: "center",
           justifyContent: "space-between",
           gap: 8,
-          marginTop: compactSquare ? 8 : 12,
+          marginTop: compactSquare ? 4 : 12,
           flexShrink: 0,
           flexWrap: "wrap",
         }}

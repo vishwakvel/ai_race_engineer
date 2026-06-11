@@ -90,7 +90,7 @@ export function SafetyCarGauge() {
           className="mb-2 uppercase tracking-wider"
           style={{
             fontFamily: "var(--font-display)",
-            fontSize: 9,
+            fontSize: 11,
             color: "var(--dash-text-muted)",
           }}
         >
@@ -106,7 +106,7 @@ export function SafetyCarGauge() {
               className="rounded-sm px-2 py-0.5"
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: 10,
+                fontSize: 11,
                 color: "var(--dash-text-secondary)",
                 background: "var(--dash-elevated)",
                 border: "1px solid var(--dash-border)",

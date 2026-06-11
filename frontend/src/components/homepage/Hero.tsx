@@ -1,3 +1,6 @@
+import { Button } from "@/components/ui/Button";
+import { useMotionSafe } from "@/hooks/useMotionSafe";
+
 function scrollToDashboard() {
   document.getElementById("dashboard")?.scrollIntoView({ behavior: "smooth" });
 }
@@ -5,6 +8,8 @@ function scrollToDashboard() {
 const HERO_BG_IMAGE = "/leclerc-monaco-win.jpg";
 
 export function Hero() {
+  const motionOk = useMotionSafe();
+
   return (
     <section
       className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
@@ -32,7 +37,7 @@ export function Hero() {
             linear-gradient(90deg, rgba(228, 3, 46, 0.06) 1px, transparent 1px)
           `,
           backgroundSize: "60px 60px",
-          animation: "grid-drift 20s linear infinite",
+          animation: motionOk ? "grid-drift 20s linear infinite" : undefined,
         }}
       />
 
@@ -74,38 +79,20 @@ export function Hero() {
           AI-powered Race Engineer for Charles Leclerc.
         </p>
 
-        <button
-          type="button"
+        <Button
+          variant="hero"
           onClick={scrollToDashboard}
-          className="reveal reveal-delay-2 transition-[background] duration-150"
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 700,
-            fontSize: 15,
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            color: "white",
-            background: "transparent",
-            border: "1px solid var(--ferrari-red)",
-            padding: "14px 32px",
-            borderRadius: 2,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "var(--ferrari-red)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-          }}
+          className="reveal reveal-delay-2"
         >
           OPEN PIT WALL →
-        </button>
+        </Button>
       </div>
 
       <div
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
         style={{
           color: "var(--home-text-muted)",
-          animation: "chevron-bounce 2s ease-in-out infinite",
+          animation: motionOk ? "chevron-bounce 2s ease-in-out infinite" : undefined,
         }}
         aria-hidden
       >

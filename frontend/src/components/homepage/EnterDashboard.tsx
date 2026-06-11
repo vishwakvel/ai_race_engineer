@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/Button";
+
 function scrollToDashboard() {
   document.getElementById("dashboard")?.scrollIntoView({ behavior: "smooth" });
 }
@@ -33,31 +35,13 @@ export function EnterDashboard() {
       >
         SELECT A RACE AND BEGIN.
       </div>
-      <button
-        type="button"
+      <Button
+        variant="hero"
         onClick={scrollToDashboard}
-        className="transition-[background] duration-150 mb-10"
-        style={{
-          fontFamily: "var(--font-display)",
-          fontWeight: 700,
-          fontSize: 16,
-          letterSpacing: "0.15em",
-          textTransform: "uppercase",
-          color: "white",
-          background: "transparent",
-          border: "1px solid var(--ferrari-red)",
-          padding: "18px 48px",
-          borderRadius: 2,
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = "var(--ferrari-red)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = "transparent";
-        }}
+        className="mb-10 text-[16px] px-12 py-[18px]"
       >
         OPEN PIT WALL →
-      </button>
+      </Button>
       <div className="flex flex-col items-center">
         <span
           className="mb-2"

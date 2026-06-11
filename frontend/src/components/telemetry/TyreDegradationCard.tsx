@@ -1,14 +1,8 @@
 import { AreaChart, Area, XAxis, YAxis, ReferenceLine, ResponsiveContainer } from "recharts";
 import { useRaceStore } from "@/store/raceStore";
 import { TyreLegend } from "@/components/common/TyreLegend";
-
-const COMPOUND_COLORS: Record<string, string> = {
-  SOFT: "#E8334A",
-  MEDIUM: "#F5C518",
-  HARD: "#D8D8D8",
-  INTERMEDIATE: "#39C473",
-  WET: "#4A9FE0",
-};
+import { COMPOUND_COLORS } from "@/design/tokens";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export function TyreDegradationCard() {
   const allLaps = useRaceStore((s) => s.allLaps) ?? [];
@@ -20,7 +14,7 @@ export function TyreDegradationCard() {
   const tyreAge = currentLapData?.tyreAge ?? 0;
   const cliffProb = lstmOutput?.cliffProb ?? 0;
 
-  const compoundColor = COMPOUND_COLORS[currentCompound] ?? "#F5C518";
+  const compoundColor = COMPOUND_COLORS[currentCompound] ?? COMPOUND_COLORS.MEDIUM!;
   const cliffPct = Math.round(cliffProb * 100);
   const cliffColor =
     cliffPct > 30 ? "var(--status-loss)" : cliffPct > 15 ? "var(--status-warn)" : "var(--dash-text-muted)";
@@ -50,25 +44,7 @@ export function TyreDegradationCard() {
   const hasData = currentLap > 0 && currentLapData != null && chartData.length > 0;
 
   if (!hasData) {
-    return (
-      <div
-        className="rounded flex items-center justify-center min-h-[160px]"
-        style={{
-          background: "var(--dash-elevated)",
-          opacity: 0.4,
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            color: "var(--dash-text-muted)",
-          }}
-        >
-          AWAITING DATA
-        </span>
-      </div>
-    );
+    return <EmptyState label="AWAITING DATA" minHeight={160} />;
   }
 
   return (

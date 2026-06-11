@@ -1,23 +1,23 @@
-const TYRES = [
-  { name: "SOFT", color: "#E8334A" },
-  { name: "MED", color: "#F5C518" },
-  { name: "HARD", color: "#D8D8D8" },
-  { name: "INTER", color: "#39C473" },
-  { name: "WET", color: "#4A9FE0" },
-];
+import { COMPOUND_COLORS, COMPOUND_LABELS } from "@/design/tokens";
 
-export function TyreLegend() {
+const TYRES = (["SOFT", "MEDIUM", "HARD", "INTERMEDIATE", "WET"] as const).map(
+  (key) => ({ name: COMPOUND_LABELS[key]!, color: COMPOUND_COLORS[key]! })
+);
+
+export function TyreLegend({ compact = false }: { compact?: boolean }) {
   return (
     <div
       style={{
         display: "flex",
         flexDirection: "row",
+        flexWrap: compact ? "wrap" : "nowrap",
         alignItems: "center",
-        gap: 16,
+        gap: compact ? 6 : 16,
         fontFamily: "var(--font-display)",
-        fontSize: 10,
+        fontSize: compact ? 8 : 10,
         textTransform: "uppercase",
         color: "var(--dash-text-muted)",
+        marginTop: compact ? 6 : 0,
       }}
     >
       {TYRES.map((t) => (

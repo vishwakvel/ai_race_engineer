@@ -11,14 +11,8 @@ import {
 } from "recharts";
 import { useMemo } from "react";
 import { useRaceStore } from "@/store/raceStore";
-
-const COMPOUND_COLORS: Record<string, string> = {
-  SOFT: "var(--tyre-soft)",
-  MEDIUM: "var(--tyre-medium)",
-  HARD: "var(--tyre-hard)",
-  INTERMEDIATE: "var(--tyre-inter)",
-  WET: "var(--tyre-wet)",
-};
+import { COMPOUND_COLORS } from "@/design/tokens";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 function formatTime(seconds: number) {
   const m = Math.floor(seconds / 60);
@@ -96,6 +90,23 @@ export function LapTimeChart() {
     };
   }, [rawLaps]);
 
+  const scSpans = useMemo(() => {
+    const spans: { start: number; end: number }[] = [];
+    let start: number | null = null;
+    for (const l of rawLaps) {
+      if (l.safetyCarActive) {
+        if (start == null) start = l.lapNumber;
+      } else if (start != null) {
+        spans.push({ start, end: l.lapNumber - 1 });
+        start = null;
+      }
+    }
+    if (start != null && rawLaps.length > 0) {
+      spans.push({ start, end: rawLaps[rawLaps.length - 1]!.lapNumber });
+    }
+    return spans;
+  }, [rawLaps]);
+
   const hasData = chartRows.length > 0;
   const numStints = stintMeta.length || 1;
 
@@ -124,25 +135,7 @@ export function LapTimeChart() {
   const predictedLapTime = lstmOutput?.predictedLapTime;
 
   if (!hasData) {
-    return (
-      <div
-        className="rounded flex items-center justify-center min-h-[240px]"
-        style={{
-          background: "var(--dash-elevated)",
-          opacity: 0.4,
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            color: "var(--dash-text-muted)",
-          }}
-        >
-          AWAITING DATA
-        </span>
-      </div>
-    );
+    return <EmptyState label="AWAITING DATA" minHeight={240} />;
   }
 
   return (
@@ -205,6 +198,15 @@ export function LapTimeChart() {
               y2={medianLapTime + 0.5}
               fill="rgba(228, 3, 46, 0.05)"
             />
+            {scSpans.map((span) => (
+              <ReferenceArea
+                key={`sc-${span.start}-${span.end}`}
+                x1={span.start - 0.5}
+                x2={span.end + 0.5}
+                fill="rgba(255, 210, 0, 0.08)"
+                strokeOpacity={0}
+              />
+            ))}
             {transitions.map((t) => (
               <ReferenceLine
                 key={`${t.lap}-${t.label}`}
@@ -216,7 +218,7 @@ export function LapTimeChart() {
                   value: t.label,
                   position: "insideTop",
                   fill: "var(--ferrari-red)",
-                  fontSize: 9,
+                  fontSize: 11,
                   fontWeight: 700,
                   offset: 6,
                 }}
@@ -225,7 +227,7 @@ export function LapTimeChart() {
             {Array.from({ length: numStints }, (_, s) => {
               const compound = stintMeta[s]?.compound ?? "MEDIUM";
               const stroke =
-                COMPOUND_COLORS[compound] ?? "var(--tyre-medium)";
+                COMPOUND_COLORS[compound] ?? COMPOUND_COLORS.MEDIUM!;
               return (
                 <Line
                   key={s}
@@ -246,10 +248,17 @@ export function LapTimeChart() {
         className="flex gap-6 mt-3 flex-wrap"
         style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}
       >
-        <span style={{ color: "var(--status-gain)" }}>
+        <span style={{ color: "var(--timing-purple)" }}>
           FASTEST&nbsp;&nbsp;{formatTime(fastest)}
         </span>
-        <span style={{ color: "var(--dash-text-primary)" }}>
+        <span
+          style={{
+            color:
+              currentLapTime > 0 && Math.abs(currentLapTime - fastest) < 0.001
+                ? "var(--timing-green)"
+                : "var(--dash-text-primary)",
+          }}
+        >
           CURRENT&nbsp;&nbsp;{formatTime(currentLapTime)}
         </span>
         {predictedLapTime != null && predictedLapTime > 0 && (
