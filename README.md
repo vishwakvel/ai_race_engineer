@@ -7,23 +7,28 @@
               ╚══════╝╚══════╝ ╚═════╝╚══════╝╚══════╝╚═╝  ╚═╝ ╚═════╝   ╚═╝  ╚═╝╚═╝
 ```
 
-*Imagine watching Charles Leclerc lose a race because his engineer poor communication and strategy. LeclercAI is an AI race engineer trained on 7 years of his real race data. It's the race engineer Charles Leclerc truly deserves.*
+*Imagine watching Charles Leclerc lose a race because of poor communication and strategy from the pit wall. LeclercAI is an AI race engineer trained on 7 years of his real race data — the race engineer Charles Leclerc truly deserves.*
+
+**Live stack:** [Vercel](https://vercel.com) (frontend) + [Render](https://render.com) (backend API). No database — lap telemetry and ML models ship inside the backend container.
 
 ---
 
 ## Table of Contents
-okay
+
 1. [Architecture](#architecture)
-2. [Machine Learning Stack](#machine-learning-stack)
-3. [How It All Connects](#how-it-all-connects)
-4. [Data Pipeline](#data-pipeline)
-5. [Backend API](#backend-api)
-6. [Frontend Dashboard](#frontend-dashboard)
-7. [File Structure](#file-structure)
-8. [Setup & Run](#setup--run)
-9. [Training Pipeline](#training-pipeline)
-10. [Environment Variables](#environment-variables)
-11. [Docker](#docker)
+2. [Production Deployment](#production-deployment)
+3. [Machine Learning Stack](#machine-learning-stack)
+4. [How It All Connects](#how-it-all-connects)
+5. [Data Pipeline](#data-pipeline)
+6. [Backend API](#backend-api)
+7. [Frontend](#frontend)
+8. [File Structure](#file-structure)
+9. [Setup & Run (Local)](#setup--run-local)
+10. [Training Pipeline](#training-pipeline)
+11. [Environment Variables](#environment-variables)
+12. [Docker (Local)](#docker-local)
+13. [CI](#ci)
+14. [Message Types Reference](#message-types-reference)
 
 ---
 
@@ -34,22 +39,18 @@ okay
 │                                                                             │
 │                        BROWSER — React + TypeScript                         │
 │                                                                             │
-│   ┌─────────────┐  ┌───────────────────────────────────────────────────┐    │
-│   │  Homepage   │  │               Race Dashboard                      │    │
-│   │             │  │                                                   │    │
-│   │  · Hero     │  │  ┌──────────┐ ┌──────────┐ ┌───────────────────┐  │    │
-│   │  · Stats    │  │  │ Race     │ │ Circuit  │ │  Engineer Panel   │  │    │
-│   │  · Features │  │  │ Selector │ │   Map    │ │                   │  │    │
-│   │             │  │  │          │ │          │ │  ┌─────────────┐  │  │    │
-│   └─────────────┘  │  │ Lap      │ │  Car dot │ │  │ Radio feed  │  │  │    │
-│                    │  │ Controls │ │  animates│ │  │ scrollable  │  │  │    │
-│                    │  └──────────┘ └──────────┘ │  └─────────────┘  │  │    │
-│                    │                            └───────────────────┘  │    │
-│                    │  ┌───────────────────────────────────────────────┐│    │
-│                    │  │  Lap Times · Tyre Deg · Position · SC Gauge   ││    │
-│                    │  │  Strategy Timeline · Pit Window               ││    │
-│                    │  └───────────────────────────────────────────────┘│    │
-│                    └───────────────────────────────────────────────────┘    │
+│   ┌─────────────────────┐  ┌─────────────────────────────────────────┐      │
+│   │  Cinematic Landing  │  │            Pit Wall Dashboard           │      │
+│   │                     │  │                                         │      │
+│   │  · Intro splash     │  │  ┌──────────┐ ┌──────────┐ ┌─────────┐  │      │
+│   │  · Hero + About     │  │  │ Race     │ │ Circuit  │ │ Engineer│  │      │
+│   │  · How It Works     │  │  │ Selector │ │   Map    │ │  Panel  │  │      │
+│   │  · OPEN PIT WALL →  │  │  │          │ │          │ │         │  │      │
+│   └─────────────────────┘  │  │ Lap      │ │  Car dot │ │  Radio  │  │      │
+│                            │  │ Controls │ │  animates│ │  feed   │  │      │
+│                            │  └──────────┘ └──────────┘ └─────────┘  │      │
+│                            │   Lap Times·Tyre Deg·SC Gauge·Strategy  │      │
+│                            └─────────────────────────────────────────┘      │
 │                                                                             │
 └──────────────────────────────────┬──────────────────────────────────────────┘
                                    │  REST / axios
@@ -87,6 +88,92 @@ okay
    leclerc_career_laps.parquet   *.pt / *.pkl / *.zip    ANTHROPIC_API_KEY
    circuit_track_maps.json       circuit_lap_stats.json
 ```
+
+### Production topology
+
+```
+                    ┌─────────────────────────────────────┐
+                    │  Browser                            │
+                    └──────────────┬──────────────────────┘
+                                   │
+              ┌────────────────────┴────────────────────┐
+              ▼                                         ▼
+   ┌──────────────────────┐              ┌──────────────────────────┐
+   │  Vercel              │              │  Render                  │
+   │  React SPA (static)  │   REST/axios │  FastAPI Docker service  │
+   │  GSAP landing page   │─────────────►│  PyTorch + XGB + PPO     │
+   │  Pit wall dashboard  │              │  parquet + models on disk│
+   └──────────────────────┘              └────────────┬─────────────┘
+                                                      │
+                                                      ▼
+                                           Anthropic Claude API
+                                           (engineer radio only)
+```
+
+There is **no PostgreSQL, Redis, or background worker**. Render hosts the always-on Python process; Vercel serves the built frontend only.
+
+---
+
+## Production Deployment
+
+### Render — backend API
+
+Deploy as a **Web Service → Docker** from this repo.
+
+| Setting | Value |
+|---------|--------|
+| **Root directory** | *(empty — repo root, not `backend/`)* |
+| **Dockerfile path** | `backend/Dockerfile` |
+| **Health check path** | `/health` |
+| **Blueprint** | Optional — use root `render.yaml` |
+
+The Dockerfile builds from the **monorepo root** (`COPY backend/ …`). Setting root directory to `backend/` will break the build.
+
+**Environment variables (Render dashboard):**
+
+| Variable | Required | Secret? | Notes |
+|----------|----------|---------|-------|
+| `ANTHROPIC_API_KEY` | ✅ Yes | ✅ Yes | Powers live team radio via Claude |
+| `PORT` | Auto | — | Injected by Render — do not set manually |
+| `PYTHONPATH` | No | — | Defaults to `/app` in Dockerfile |
+| `DATA_DIR` | No | — | Defaults to `/app/backend/data/processed` |
+| `MODEL_DIR` | No | — | Defaults to `/app/backend/data/models` |
+
+**Secret files:** none. Models and parquet are baked into the image; the API key is a single env var.
+
+After deploy, verify:
+
+```bash
+curl https://<your-service>.onrender.com/health
+# expect: {"status":"ok","models_loaded":true,"data_rows":7775,...}
+```
+
+**Free tier note:** Render spins down idle services. The first request after sleep can take 30–60s while models load.
+
+### Vercel — frontend
+
+| Setting | Value |
+|---------|--------|
+| **Root directory** | `frontend` |
+| **Build command** | `npm run build` |
+| **Output directory** | `dist` |
+| **Framework preset** | Vite |
+
+**Environment variable (Vercel dashboard):**
+
+| Variable | Value |
+|----------|--------|
+| `VITE_API_BASE_URL` | `https://<your-render-service>.onrender.com` |
+
+Redeploy Vercel after changing `VITE_API_BASE_URL` — Vite bakes it in at build time.
+
+CORS on the backend already allows `https://*.vercel.app` and the production preview URL (`backend/main.py`).
+
+### End-to-end checklist
+
+1. Deploy backend on Render → copy service URL.
+2. Set `VITE_API_BASE_URL` on Vercel → redeploy frontend.
+3. Open the Vercel URL → scroll through landing → **OPEN PIT WALL** → load a race → confirm lap replay and radio messages.
 
 ---
 
@@ -404,11 +491,11 @@ FastF1 API  ──────────────────────�
 
 ## Backend API
 
-All endpoints are served from `backend/main.py` (FastAPI). The `ModelRegistry` loads everything at startup.
+FastAPI app in `backend/main.py`. Read-only data routes live in `backend/routes/data.py`. The `ModelRegistry` loads all ML artifacts once at startup (Render cold start: ~30–60s on free tier).
 
 | Method | Path | What it does |
 |--------|------|-------------|
-| `GET` | `/health` | Model load status, parquet row count, cache stats |
+| `GET` | `/health` | Model load status, parquet row count — **Render health check** |
 | `GET` | `/races` | All Leclerc races (year, round, circuit, finish position) |
 | `GET` | `/race/{year}/{round}/laps` | Full lap data for a race (57+ fields per lap) |
 | `GET` | `/circuit/track_map/{circuit_id}` | SVG polyline + viewBox + DRS zone count |
@@ -416,15 +503,30 @@ All endpoints are served from `backend/main.py` (FastAPI). The `ModelRegistry` l
 | `POST` | `/predict/safety_car` | XGBoost ensemble → SC prob, VSC ratio, SHAP factors |
 | `GET` | `/predict/weather/{circuit_id}` | Weather model → condition, lap delta, SC multiplier |
 | `POST` | `/strategy/recommend` | PPO → action + Monte Carlo finishing distribution |
+| `POST` | `/race/lap_tick` | Combined per-lap inference (used by replay loop) |
 | `POST` | `/engineer/message` | Claude → team radio message from ML context |
 | `GET` | `/engineer/prerace_strategy` | Pre-race brief with strategy options |
 | `GET` | `/debug/model_versions` | Training history and active model artifacts |
 
 ---
 
-## Frontend Dashboard
+## Frontend
 
-```
+The app is a single-page experience: a **GSAP scroll-driven landing** flows into the **pit wall dashboard** on the same page. Deep links like `/race/2024/8?lap=33` skip straight to a loaded race.
+
+### Landing (scroll experience)
+
+| Section | What it does |
+|---------|----------------|
+| **Intro splash** | Full-screen Ferrari red → `LECLERCAI` fade |
+| **Hero** | Eyes image, morphing logo, tagline, scroll cue |
+| **About** | Word-by-word reveal pinned on scroll |
+| **How It Works** | Five horizontal cards (ML pillars) |
+| **OPEN PIT WALL** | Spin-slider CTA → scrolls to dashboard |
+
+Built with **GSAP ScrollTrigger**, scroll snap, custom red cursor, **Anton + DM Sans** fonts.
+
+### Pit wall dashboard
 ┌────────────────────────────────────────────────────────────────────────┐
 │  HEADER  — Lap counter · SC bar · Rain indicator · Race win glow       │
 ├──────────────────────────────────────────────────────────────────────  │
@@ -462,13 +564,15 @@ All endpoints are served from `backend/main.py` (FastAPI). The `ModelRegistry` l
 ```
 
 **Key frontend features:**
+- **OPEN PIT WALL button** — spin-slider interaction; navigates to dashboard and resets when you scroll back to hero
 - **BOX BOX banner** — slides down with compound color when Leclerc actually pits in historical data, auto-dismisses after 3 seconds
 - **Car animation** — snaps to start/finish line on each lap change, animates at correct speed (adjusts for 1×/2×/5× playback)
 - **Tyre legend** — `● SOFT  ● MED  ● HARD  ● INTER  ● WET` below strategy timeline
 - **Rain indicator** — teardrop icon fades in when `rainfall = 1`
 - **Race win glow** — Ferrari red header glow + "RACE WIN" for P1 finishes
+- **URL sync** — race year/round/lap reflected in the address bar for shareable links
 
-**Tech stack:** React 18, TypeScript, Vite, Zustand, Recharts, Framer Motion, Axios, Tailwind
+**Tech stack:** React 18, TypeScript, Vite, React Router, Zustand, TanStack Query, Recharts, GSAP, Framer Motion, Axios, Tailwind, Vitest
 
 ---
 
@@ -478,86 +582,101 @@ All endpoints are served from `backend/main.py` (FastAPI). The `ModelRegistry` l
 ai_race_engineer/
 │
 ├── README.md
-├── docker-compose.yml
+├── render.yaml                          ← Render Blueprint (backend Docker service)
+├── docker-compose.yml                   ← Local dev: backend + Vite frontend
+├── docker-compose.prod.yml              ← Local prod: backend + nginx frontend
+├── .github/workflows/ci.yml             ← Lint, test, build on push/PR
 │
 ├── backend/
-│   ├── main.py                          ← FastAPI app, all endpoints, lifespan
+│   ├── main.py                          ← FastAPI app, ML endpoints, CORS, rate limit
+│   ├── schemas.py                       ← Pydantic request/response models
+│   ├── circuits.py                      ← Circuit ID → display name map
+│   ├── utils.py
 │   ├── requirements.txt
-│   ├── Dockerfile
-│   ├── .env                             ← ANTHROPIC_API_KEY (never commit this)
+│   ├── requirements-dev.txt             ← pytest + dev deps (CI)
+│   ├── Dockerfile                       ← Render + Docker Compose image
+│   ├── .env                             ← ANTHROPIC_API_KEY (never commit)
+│   │
+│   ├── routes/
+│   │   └── data.py                      ← /health, /races, laps, track maps
 │   │
 │   ├── models/                          ← Inference wrappers (loaded at startup)
 │   │   ├── model_registry.py            ← Loads and wires all models
-│   │   ├── lstm_model.py                ← LSTM wrapper + denormalization
-│   │   ├── xgb_model.py                 ← XGBoost ensemble + SHAP
-│   │   ├── rl_policy.py                 ← PPO wrapper + shape safety check
-│   │   └── weather_model.py             ← Weather correction models
+│   │   ├── lstm_model.py
+│   │   ├── xgb_model.py
+│   │   ├── rl_policy.py
+│   │   └── weather_model.py
 │   │
 │   ├── features/
-│   │   ├── feature_builder.py           ← LSTM sequence builder + RL observation
-│   │   └── validate_features.py         ← Train-serve consistency check
+│   │   ├── feature_builder.py
+│   │   └── validate_features.py
 │   │
 │   ├── simulation/
-│   │   ├── race_sim.py                  ← Lap-by-lap simulator
-│   │   └── monte_carlo.py               ← Parallel 50-sim finishing distribution
+│   │   ├── race_sim.py
+│   │   └── monte_carlo.py
 │   │
 │   ├── engineer/
-│   │   └── radio_generator.py           ← Claude prompts, message types, priority
+│   │   └── radio_generator.py           ← Claude prompts + message priority
 │   │
-│   ├── training/                        ← Run these to build from scratch
-│   │   ├── collect_data.py              ← FastF1 → raw CSVs
-│   │   ├── clean_data.py                ← CSVs → parquet + JSON artifacts
-│   │   ├── generate_track_maps.py       ← GeoJSON → circuit_track_maps.json
-│   │   ├── train_lstm.py                ← Trains TyreDegradationLSTM
-│   │   ├── train_xgb.py                 ← Trains XGBoost + LR ensemble
-│   │   ├── train_weather_model.py       ← Trains weather correction models
-│   │   ├── train_rl.py                  ← Trains PPO policy (SB3)
-│   │   ├── leclerc_race_env.py          ← Gymnasium environment
-│   │   └── model_versioning.py          ← Timestamps + metrics tracking
+│   ├── tests/                           ← pytest (API, lap_tick, rate limit)
+│   │
+│   ├── training/                        ← CLI scripts — run locally, not on Render
+│   │   ├── collect_data.py
+│   │   ├── clean_data.py
+│   │   ├── generate_track_maps.py
+│   │   ├── train_lstm.py
+│   │   ├── train_xgb.py
+│   │   ├── train_weather_model.py
+│   │   ├── train_rl.py
+│   │   ├── leclerc_race_env.py
+│   │   └── model_versioning.py
 │   │
 │   └── data/
-│       ├── raw/                         ← FastF1 cache + CSVs (gitignored)
+│       ├── raw/                         ← FastF1 cache (gitignored)
 │       ├── processed/
-│       │   ├── leclerc_career_laps.parquet   ← Main dataset
-│       │   └── circuit_track_maps.json        ← SVG circuit coordinates
-│       └── models/
-│           ├── lstm_weights.pt + lstm_config.json + lstm_norm_stats.json
-│           ├── xgb_sc_model.pkl + lr_sc_model.pkl + xgb_feature_names.json
-│           ├── ppo_strategy_policy.zip
-│           ├── weather_lap_model.pkl + weather_sc_model.pkl
-│           ├── circuit_lap_stats.json         ← Per-circuit mean/std
-│           ├── circuit_pit_loss.json          ← Data-driven pit time loss
-│           ├── circuit_battle_intensity.json  ← Data-driven midfield gaps
-│           ├── circuit_vsc_ratio.json         ← VSC vs full SC per circuit
-│           └── model_versions.json            ← Training history + active ptr
+│       │   ├── leclerc_career_laps.parquet
+│       │   └── circuit_track_maps.json
+│       └── models/                      ← Trained weights (shipped in Docker image)
 │
 └── frontend/
     ├── package.json
     ├── vite.config.ts
+    ├── nginx.conf                       ← Used by Dockerfile.prod
+    ├── Dockerfile.prod
     ├── .env                             ← VITE_API_BASE_URL (never commit)
     └── src/
-        ├── App.tsx                      ← Landing + scroll to dashboard
-        ├── pages/RaceDashboard.tsx      ← Main 3-column grid
+        ├── main.tsx
+        ├── App.tsx
+        ├── routes/
+        │   ├── AppRouter.tsx            ← `/` and `/race/:year/:round`
+        │   └── useRaceUrlSync.ts        ← URL ↔ lap state
+        ├── pages/RaceDashboard.tsx
+        ├── components/
+        │   ├── landing/                 ← IntroSplash, Hero, About, HowItWorks, PitWallButton
+        │   ├── layout/                  ← TimingStrip, MainLayout
+        │   ├── dashboard/
+        │   ├── telemetry/
+        │   ├── strategy/
+        │   ├── safety/
+        │   ├── track/
+        │   ├── engineer/
+        │   ├── ui/
+        │   └── common/
         ├── hooks/
-        │   └── useRaceReplay.ts         ← Lap stepping + all API calls
-        ├── store/raceStore.ts           ← Zustand: laps, messages, pit events
-        ├── api/client.ts                ← Axios instance + typed helpers
-        ├── types/index.ts               ← Shared TypeScript types
-        └── components/
-            ├── layout/Header.tsx
-            ├── homepage/                ← Hero, StatsStrip, FeatureSection
-            ├── dashboard/               ← RaceSelectionCard
-            ├── telemetry/               ← LapTimeChart, TyreDegCard, PositionTracker
-            ├── strategy/                ← StrategyTimeline
-            ├── safety/                  ← SafetyCarGauge
-            ├── track/                   ← TrackMap (animated car dot)
-            ├── engineer/                ← EngineerPanel, RadioMessage, BoxBoxBanner
-            └── common/                  ← TyreLegend
+        │   ├── useRaceReplay.ts         ← Lap stepping + API orchestration
+        │   ├── useRaceLoader.ts
+        │   ├── useLandingScroll.ts      ← GSAP scroll choreography
+        │   └── useMotionSafe.ts
+        ├── replay/                      ← lapContext, playbackClock, lapMath
+        ├── store/raceStore.ts
+        ├── api/client.ts                ← Axios + typed API helpers
+        ├── design/tokens.ts
+        └── styles/landing.css
 ```
 
 ---
 
-## Setup & Run
+## Setup & Run (Local)
 
 ### Prerequisites
 
@@ -652,17 +771,25 @@ kill $(lsof -ti :8000) && uvicorn backend.main:app --reload --port 8000
 
 ## Environment Variables
 
-| Variable | File | Required | Purpose |
-|----------|------|----------|---------|
-| `ANTHROPIC_API_KEY` | `backend/.env` | ✅ Yes | Claude for `/engineer/message` |
-| `VITE_API_BASE_URL` | `frontend/.env` | ✅ Yes | Backend URL for axios |
-| `DATA_DIR` | shell / backend | Optional | Override parquet location |
-| `MODEL_DIR` | shell / backend | Optional | Override model artifacts location |
-| `F1_CACHE_DIR` | shell / backend | Optional | Override FastF1 cache path |
+| Variable | Where | Required | Purpose |
+|----------|-------|----------|---------|
+| `ANTHROPIC_API_KEY` | `backend/.env` (local) · Render dashboard (prod) | ✅ Yes | Claude for `/engineer/message` |
+| `VITE_API_BASE_URL` | `frontend/.env` (local) · Vercel dashboard (prod) | ✅ Yes | Backend URL for axios |
+| `DATA_DIR` | shell / Docker / Render | Optional | Override parquet location |
+| `MODEL_DIR` | shell / Docker / Render | Optional | Override model artifacts location |
+| `F1_CACHE_DIR` | shell (training only) | Optional | FastF1 cache path for `collect_data.py` |
+| `RATE_LIMIT_PER_MINUTE` | Render / shell | Optional | API rate limit (default `240`) |
+| `PORT` | Render (auto) | — | Do not set manually on Render |
+
+**Render:** only `ANTHROPIC_API_KEY` is required in the dashboard — path env vars have sensible Dockerfile defaults.
+
+**Vercel:** only `VITE_API_BASE_URL` pointing at your Render service URL.
+
+**Secret files:** not used anywhere in this project.
 
 ---
 
-## Docker
+## Docker (Local)
 
 ### Development
 
@@ -671,38 +798,38 @@ docker compose up --build
 ```
 
 This starts both services:
-- **Backend** on port **8000** — mounts `./backend/data` → `/app/data`
+- **Backend** on port **8000** — mounts `./backend/data` → `/app/data` (compose overrides `DATA_DIR` / `MODEL_DIR`)
 - **Frontend** on port **5173** — Vite dev server, depends on backend
 
 Set `ANTHROPIC_API_KEY` in `backend/.env` for live engineer radio messages.
 
-### Production
+### Production-like (local)
 
 ```bash
 docker compose -f docker-compose.prod.yml up --build
 ```
 
-This builds and serves:
-- **Backend** on port **8000** — same data/model volume mounts as dev
+- **Backend** on port **8000**
 - **Frontend** on port **8080** — nginx serving the static Vite build
 
-The production frontend is built with `VITE_API_BASE_URL=http://localhost:8000` (see `docker-compose.prod.yml`). Change the build arg if the API is hosted elsewhere.
+The prod compose build uses `VITE_API_BASE_URL=http://localhost:8000`. For a remote API, change the build arg in `docker-compose.prod.yml`.
 
-Deep links such as `/race/2024/8?lap=33` work in production — nginx falls back to `index.html` for client-side routing.
+Deep links such as `/race/2024/8?lap=33` work — nginx falls back to `index.html` for client-side routing.
 
-### Render (backend API)
+> **Production hosting** uses Vercel + Render, not Docker Compose. See [Production Deployment](#production-deployment).
 
-Deploy the FastAPI backend as a **Web Service → Docker** from this repo:
+---
 
-1. Connect the GitHub repo on [Render](https://render.com).
-2. Use **Blueprint** with `render.yaml`, or create a Web Service manually:
-   - **Root directory:** repo root
-   - **Dockerfile path:** `backend/Dockerfile`
-   - **Health check path:** `/health`
-3. Set **`ANTHROPIC_API_KEY`** in the Render dashboard (required for live engineer radio).
-4. Copy the service URL (e.g. `https://leclercai-api.onrender.com`) into Vercel as **`VITE_API_BASE_URL`**, then redeploy the frontend.
+## CI
 
-The container listens on Render’s injected **`PORT`** (defaults to `8000` locally). Models and lap data are baked into the image via `COPY backend/`.
+GitHub Actions (`.github/workflows/ci.yml`) runs on every push to `main` and on pull requests:
+
+| Job | Steps |
+|-----|--------|
+| **frontend** | `npm ci` → lint → typecheck → Vitest → build |
+| **backend** | pip install → `pytest backend/tests/` |
+
+No deploy step in CI — Vercel and Render auto-deploy from `main` when connected to GitHub.
 
 ---
 
