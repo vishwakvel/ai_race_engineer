@@ -3,37 +3,44 @@
 @tailwind utilities;
 
 :root {
-  /* === HOMEPAGE COLORS === */
-  --ferrari-red: #e4032e;
-  --ferrari-red-dark: #b5021f;
-  --ferrari-red-glow: rgba(228, 3, 46, 0.15);
+  /* === HOMEPAGE / LANDING COLORS === */
+  --ferrari-red: #e8002d;
+  --ferrari-red-dark: #b80024;
+  --ferrari-red-glow: rgba(232, 0, 45, 0.35);
+  --accent-red-hover: #ff4d4d;
+  --landing-muted: #3a3a3a;
   --sky-blue: #95c4eb;
   --sky-blue-dim: rgba(149, 196, 235, 0.2);
 
   /* Homepage backgrounds */
-  --home-bg: #050508;
-  --home-surface: #0c0c12;
-  --home-card: #111118;
+  --home-bg: #0a0a0a;
+  --home-surface: #0f0f0f;
+  --home-card: #141414;
 
   /* Homepage text */
-  --home-text-primary: #f0f0f5;
-  --home-text-secondary: #8888a0;
-  --home-text-muted: #404055;
+  --home-text-primary: #f0f0f0;
+  --home-text-secondary: #888888;
+  --home-text-muted: #3a3a3a;
 
   /* Homepage borders */
-  --home-border: rgba(255, 255, 255, 0.06);
-  --home-border-accent: rgba(228, 3, 46, 0.3);
+  --home-border: #3a3a3a;
+  --home-border-accent: rgba(232, 0, 45, 0.35);
 
-  /* === DASHBOARD COLORS === */
-  --dash-bg: #06060f;
-  --dash-surface: #0c0c1c;
-  --dash-elevated: #121228;
-  --dash-border: #1a1a35;
-  --dash-border-bright: #252545;
+  /* === DASHBOARD COLORS — aligned with landing === */
+  --dash-bg: #0a0a0a;
+  --dash-surface: #0f0f0f;
+  --dash-elevated: #141414;
+  --dash-border: #3a3a3a;
+  --dash-border-bright: #4a4a4a;
 
-  --dash-text-primary: #e8e8f2;
-  --dash-text-secondary: #5a5a80;
-  --dash-text-muted: #2e2e50;
+  --dash-text-primary: #f0f0f0;
+  --dash-text-secondary: #888888;
+  --dash-text-muted: #555555;
+
+  /* Broadcast timing (F1 TV grammar) */
+  --timing-purple: #c04dff;
+  --timing-green: #2bd672;
+  --timing-yellow: #ffd12e;
 
   /* Tyre compounds — FIA standard colors */
   --tyre-soft: #e8334a;
@@ -50,9 +57,9 @@
   --status-sc: #ff9800;
 
   /* === TYPOGRAPHY === */
-  --font-display: "Barlow Condensed", sans-serif;
+  --font-display: "Anton", "Barlow Condensed", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
-  --font-body: "Inter", sans-serif;
+  --font-body: "DM Sans", sans-serif;
 }
 
 * {
@@ -60,7 +67,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 html,
@@ -85,6 +92,7 @@ body {
   min-height: 100vh;
   background: var(--dash-bg);
   overflow: visible;
+  font-family: var(--font-body);
 }
 
 /* Remove default focus outlines; use custom where needed */
@@ -98,6 +106,11 @@ a:focus-visible {
 button,
 select {
   font-family: inherit;
+}
+
+select option {
+  background-color: var(--dash-elevated);
+  color: var(--dash-text-primary);
 }
 
 input {
@@ -131,11 +144,43 @@ input {
   background: transparent;
 }
 .radio-feed::-webkit-scrollbar-thumb {
-  background: #333355;
+  background: #3a3a3a;
   border-radius: 2px;
 }
 
 .radio-feed {
   scrollbar-width: thin;
-  scrollbar-color: #333355 transparent;
+  scrollbar-color: #3a3a3a transparent;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 9999;
+  padding: 8px 16px;
+  background: var(--ferrari-red);
+  color: white;
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 16px;
+  top: 16px;
 }
