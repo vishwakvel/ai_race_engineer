@@ -1,3 +1,25 @@
-backend/data/raw/
+# --- Secrets ---
 backend/.env
 **/.env
+
+# --- Data (large / regenerable) ---
+backend/data/raw/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# --- Node / frontend build ---
+node_modules/
+frontend/dist/
+
+# --- Training artifacts (keep canonical weights, ignore logs/snapshots) ---
+backend/data/models/ppo_logs/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+*.swp
