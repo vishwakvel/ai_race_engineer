@@ -7,6 +7,9 @@ services:
       - "8000:8000"
     env_file:
       - ./backend/.env
+    environment:
+      MODEL_DIR: /app/data/models
+      DATA_DIR: /app/data/processed
     volumes:
       - ./backend/data:/app/data
 

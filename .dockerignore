@@ -1,0 +1,26 @@
+# Both Dockerfiles build from the repo root context — keep images lean.
+
+# VCS / OS
+.git
+.gitignore
+.DS_Store
+
+# Secrets (injected via compose env_file, never baked into images)
+**/.env
+
+# Frontend
+frontend/node_modules
+frontend/dist
+
+# Python
+**/__pycache__
+**/*.pyc
+.pytest_cache
+
+# Large / non-runtime data
+backend/data/raw
+backend/data/models/ppo_logs
+backend/notebooks
+
+# Docs
+README.md
