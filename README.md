@@ -525,42 +525,6 @@ The app is a single-page experience: a **GSAP scroll-driven landing** flows into
 | **OPEN PIT WALL** | Spin-slider CTA → scrolls to dashboard |
 
 Built with **GSAP ScrollTrigger**, scroll snap, custom red cursor, **Anton + DM Sans** fonts.
-
-### Pit wall dashboard
-┌────────────────────────────────────────────────────────────────────────┐
-│  HEADER  — Lap counter · SC bar · Rain indicator · Race win glow       │
-├──────────────────────────────────────────────────────────────────────  │
-│                                                                        │
-│  ┌──────────────┐  ┌──────────────────────────┐  ┌─────────────────┐   │
-│  │ RACE SELECT  │  │                          │  │  TEAM RADIO     │   │
-│  │              │  │    CIRCUIT MAP           │  │                 │   │
-│  │ Season ▼     │  │    (real GPS coords)     │  │ ┌─────────────┐ │   │
-│  │ Race ▼       │  │                          │  │ │ BOX CALL    │ │   │
-│  │              │  │    ● car dot animates    │  │ │ LAP 28      │ │   │
-│  │ [LOAD RACE]  │  │      around track        │  │ └─────────────┘ │   │
-│  │              │  │      from S/F line       │  │ ┌─────────────┐ │   │
-│  ├──────────────┤  │      each lap            │  │ │ ADVISORY    │ │   │
-│  │ LAP CONTROLS │  │                          │  │ │ LAP 27      │ │   │
-│  │              │  │                          │  │ └─────────────┘ │   │
-│  │ ◄ PREV NEXT► │  └──────────────────────────┘  │ ┌─────────────┐ │   │
-│  │ LAP 28 / 57  │                                │ │ ROUTINE     │ │   │
-│  │ ▶ PLAY LAP   │                                │ │ LAP 26      │ │   │
-│  │ 1× ▼ SPEED   │                                │ └─────────────┘ │   │
-│  └──────────────┘                                │   (scrollable)  │   │
-│                                                  └─────────────────┘   │
-│  ┌─────────────────────────────────────────────────────────────────┐   │
-│  │  LAP TIMES chart  │  TYRE DEG (stint delta)  │  POSITION TRACKER│   │
-│  └─────────────────────────────────────────────────────────────────┘   │
-│  ┌─────────────────────────────────────────────────────────────────┐   │
-│  │  STRATEGY TIMELINE (all stints, completed + future)             │   │
-│  │  ██████████████████████▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒                │   │
-│  │  SOFT (22 laps)       MED (18 laps)      HARD (future)          │   │
-│  └─────────────────────────────────────────────────────────────────┘   │
-│  ┌────────────────────────────┐  ┌──────────────────────────────────┐  │
-│  │  SAFETY CAR GAUGE          │  │  SC SHAP FACTORS                 │  │
-│  │  ████░░░░░░ 35% risk       │  │  · Wet conditions ↑              │  │
-│  └────────────────────────────┘  └──────────────────────────────────┘  │
-└────────────────────────────────────────────────────────────────────────┘
 ```
 
 **Key frontend features:**
