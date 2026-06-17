@@ -1,7 +1,10 @@
 """Registry that loads and holds LSTM, XGBoost, and PPO models at server startup."""
 
+import logging
 import os
 import json
+
+logger = logging.getLogger(__name__)
 
 from .lstm_model import LSTMModel
 from .xgb_model import XGBModel
@@ -49,7 +52,7 @@ class ModelRegistry:
             from backend.features.feature_builder import FeatureBuilder
             self.feature_builder = FeatureBuilder(self.norm_stats)
         else:
-            print("[ModelRegistry] WARNING: norm_stats not found; FeatureBuilder not initialised.")
+            logger.warning("norm_stats not found; FeatureBuilder not initialised.")
 
         from backend.simulation.race_sim import RaceSimulator
         from backend.simulation.monte_carlo import MonteCarloEngine
@@ -84,11 +87,11 @@ class ModelRegistry:
         if os.path.exists(circuit_maps_path):
             with open(circuit_maps_path) as f:
                 self.circuit_track_maps = json.load(f)
-            print(f"[ModelRegistry] Loaded {len(self.circuit_track_maps)} circuit track maps.")
+            logger.info("Loaded %d circuit track maps.", len(self.circuit_track_maps))
             for k in sorted(self.circuit_track_maps.keys()):
-                print(f"[ModelRegistry] circuit_map_key: {k}")
+                logger.debug("circuit_map_key: %s", k)
 
-        print("[ModelRegistry] All components loaded.")
+        logger.info("All components loaded.")
 
     @property
     def ready(self) -> bool:

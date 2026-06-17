@@ -353,7 +353,7 @@ def strategy_recommend(
 ) -> StrategyRecommendResponse:
     return _strategy_recommend_impl(
         request.app.state.models,
-        body.current_state or body.state or {},
+        body.current_state or {},
         body.run_monte_carlo,
         body.n_simulations,
     )
@@ -409,7 +409,7 @@ def race_lap_tick(body: LapTickRequest, request: Request) -> LapTickResponse:
     sc = _predict_safety_car_impl(models, body.safety_car)
 
     # Strategy state depends on phase-1 outputs.
-    strategy_state = dict(body.strategy.current_state or body.strategy.state or {})
+    strategy_state = dict(body.strategy.current_state or {})
     strategy_state.setdefault("sc_probability", sc.sc_probability)
     strategy_state.setdefault("cliff_probability", lap_pred["cliff_probability"])
     strategy = _strategy_recommend_impl(

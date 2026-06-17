@@ -6,6 +6,7 @@ Uses LSTM for lap times, XGBoost for SC events, PPO or fixed strategy.
 import os
 import json
 import copy
+import functools
 import numpy as np
 import torch
 
@@ -20,23 +21,16 @@ def _load_json(path: str, default: dict) -> dict:
     return default
 
 
-# xgb_feature_names.json is static per process; previously re-read from disk
-# on every simulated lap of every Monte Carlo run.
-_FEATURE_NAMES_CACHE: dict[str, list | None] = {}
-
-
+@functools.lru_cache(maxsize=None)
 def _xgb_feature_names(models_dir: str) -> list | None:
-    if models_dir not in _FEATURE_NAMES_CACHE:
-        fn_path = os.path.join(models_dir, "xgb_feature_names.json")
-        names = None
-        if os.path.exists(fn_path):
-            try:
-                with open(fn_path) as f:
-                    names = json.load(f)
-            except Exception:
-                names = None
-        _FEATURE_NAMES_CACHE[models_dir] = names
-    return _FEATURE_NAMES_CACHE[models_dir]
+    fn_path = os.path.join(models_dir, "xgb_feature_names.json")
+    if os.path.exists(fn_path):
+        try:
+            with open(fn_path) as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return None
 
 
 def _simulate_lap_time_impl(
@@ -312,8 +306,3 @@ class RaceSimulator:
             "pits_taken": pits_taken,
             "sc_events": sc_events,
         }
-
-
-def run_simulation(current_state: dict, lstm_model, xgb_model, ppo_policy=None, seed: int | None = None):
-    sim = RaceSimulator(lstm_model, xgb_model, ppo_policy, None, None, "")
-    return sim.simulate(current_state, strategy=None, seed=seed or 42)

@@ -198,7 +198,7 @@ export interface LapTickRequestBody {
   };
   safety_car: Record<string, unknown>;
   strategy: {
-    state: Record<string, unknown>;
+    current_state: Record<string, unknown>;
     run_monte_carlo: boolean;
     n_simulations: number;
   };
@@ -343,7 +343,7 @@ export function buildLapTickRequest(args: {
       compound: compoundIndex(lap),
     },
     strategy: {
-      state: rlState,
+      current_state: rlState,
       run_monte_carlo: true,
       n_simulations: mcSimulations,
     },

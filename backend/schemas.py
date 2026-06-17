@@ -33,12 +33,6 @@ class NextLapRequest(BaseModel):
     current_state: dict[str, Any] = Field(default_factory=dict)
 
 
-class NextLapResponse(BaseModel):
-    predicted_lap_time: float
-    deg_rate: float
-    cliff_probability: float
-    warning: str | None = None
-
 
 class SafetyCarRequest(BaseModel):
     lap_number: int
@@ -64,7 +58,6 @@ class SafetyCarResponse(BaseModel):
 
 
 class StrategyRecommendRequest(BaseModel):
-    state: dict[str, Any] = Field(default_factory=dict)
     current_state: dict[str, Any] = Field(default_factory=dict)
     run_monte_carlo: bool = False
     n_simulations: int = Field(default=500, ge=1, le=500)
@@ -86,13 +79,6 @@ class EngineerMessageRequest(BaseModel):
     context: dict[str, Any] = Field(default_factory=dict)
     recent_message_types: list[str] = Field(default_factory=list)
 
-
-class EngineerMessageResponse(BaseModel):
-    message: str
-    urgency: str
-    message_type: str
-    lap_number: int
-    fallback: bool = False
 
 
 class LapTickRequest(BaseModel):

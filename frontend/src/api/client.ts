@@ -203,7 +203,6 @@ export interface StrategyRecommendApiResponse {
 
 /** POST /strategy/recommend — PPO */
 export async function recommendStrategy(body: {
-  state?: Record<string, unknown>;
   current_state?: Record<string, unknown>;
   run_monte_carlo?: boolean;
   n_simulations?: number;

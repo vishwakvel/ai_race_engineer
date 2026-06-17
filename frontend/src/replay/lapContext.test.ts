@@ -104,10 +104,10 @@ describe("buildLapTickRequest", () => {
     expect(body.next_lap.current_state.circuit_id).toBe("monza");
     expect(body.safety_car.lap_number).toBe(1);
     expect(body.strategy.n_simulations).toBe(150);
-    expect(body.strategy.state.drs_zones_count).toBe(2);
+    expect(body.strategy.current_state.drs_zones_count).toBe(2);
     expect(body.recent_message_types).toEqual(["ROUTINE_PACE_NOTE"]);
     // Model-derived fields must NOT be set client-side.
-    expect(body.strategy.state.sc_probability).toBeUndefined();
+    expect(body.strategy.current_state.sc_probability).toBeUndefined();
     expect(body.engineer_context.predicted_lap_time).toBeUndefined();
   });
 
